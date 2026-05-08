@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${CTC_DB_NAME:-cutthecrap_dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ${ACR_REGISTRY:-}cutthecrap-backend:${IMAGE_TAG:-latest}
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING:-postgresql://postgres:postgres@db:5432/${CTC_DB_NAME:-cutthecrap_dev}}
+      CORS_ORIGIN: https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}
+      FRONTEND_URL: https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}
+      WORKOS_REDIRECT_URI: https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}/api/v1/auth/callback
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      default:
+      proxy-net:
+        aliases:
+          - ${CTC_BACKEND_ALIAS:-ctc-backend}
+
+  frontend:
+    image: ${ACR_REGISTRY:-}cutthecrap-frontend:${IMAGE_TAG:-latest}
+    build:
+      context: ./frontend
+      args:
+        EXPO_PUBLIC_API_BASE: ""
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      default:
+      proxy-net:
+        aliases:
+          - ${CTC_FRONTEND_ALIAS:-ctc-frontend}
+
+volumes:
+  pgdata:
+
+networks:
+  proxy-net:
+    external: true
+
