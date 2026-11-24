@@ -104,6 +104,7 @@ resource "azapi_resource" "function" {
   parent_id                 = data.azurerm_resource_group.this.id
   location                  = var.location
   schema_validation_enabled = false
+  ignore_casing             = true
 
   body = {
     kind = "functionapp,linux"

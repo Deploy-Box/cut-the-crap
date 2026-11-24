@@ -103,7 +103,7 @@ jobs:
       - name: Verify API readiness and preview isolation
         run: |
           host="$(az functionapp show --resource-group rg-cutthecrap-prod \
-            --name func-cutthecrap-api-prod --query defaultHostName -o tsv)"
+            --name func-cutthecrap-api-prod --query properties.defaultHostName -o tsv)"
           if [ -z "$host" ]; then
             echo "Function App did not return a hostname." >&2
             exit 1
