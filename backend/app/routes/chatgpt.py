@@ -14,6 +14,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from app.services.recipe_service import (
+    DEFAULT_CHAT_MODEL,
     RECIPE_RESPONSE_FORMAT,
     RECIPE_SYSTEM_PROMPT,
     call_openai_chat,
@@ -32,7 +33,7 @@ limiter = Limiter(key_func=get_remote_address)
 class ParseTextPayload(BaseModel):
     text: str
     system_prompt: Optional[str] = None
-    model: str = "gpt-5.4-nano"
+    model: str = DEFAULT_CHAT_MODEL
     response_format: Optional[dict[str, Any]] = None
     temperature: float = 0.2
     max_tokens: int = 4000
@@ -41,7 +42,7 @@ class ParseTextPayload(BaseModel):
 class ParseUrlPayload(BaseModel):
     url: str
     system_prompt: Optional[str] = None
-    model: str = "gpt-5.4-nano"
+    model: str = DEFAULT_CHAT_MODEL
     response_format: Optional[dict[str, Any]] = None
     temperature: float = 0.2
     max_tokens: int = 4000

@@ -295,6 +295,14 @@ class TestChatGPTParseText:
         )
         assert response.status_code == 200
         assert response.json()["success"] is True
+        assert mock_call.call_args.kwargs["model"] == "gpt-4o-mini"
+
+    @patch("app.routes.chatgpt.call_openai_chat")
+    def test_explicit_model_is_preserved(self, mock_call):
+        mock_call.return_value = {"success": True}
+        client = _get_test_client()
+        client.post("/api/v1/chatgpt/parse", json={"text": "test", "model": "custom-model"})
+        assert mock_call.call_args.kwargs["model"] == "custom-model"
 
     @patch("app.routes.chatgpt.call_openai_chat")
     def test_uses_default_system_prompt(self, mock_call):
@@ -326,6 +334,7 @@ class TestChatGPTParseUrl:
             json={"url": "https://example.com/recipe"},
         )
         assert response.status_code == 200
+        assert mock_call.call_args.kwargs["model"] == "gpt-4o-mini"
 
     @patch("app.routes.chatgpt.fetch_and_extract")
     def test_fetch_failure_raises_http_exception(self, mock_fetch):

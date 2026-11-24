@@ -21,6 +21,7 @@ from app.utils.logger import logger
 
 REMOVED_TAGS = ["script", "style", "noscript", "svg", "iframe", "template"]
 STRUCTURAL_TAGS = ["header", "footer", "nav", "aside", "form"]
+DEFAULT_CHAT_MODEL = "gpt-4o-mini"
 
 FETCH_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -189,7 +190,7 @@ async def call_openai_chat(
     *,
     text: str,
     system_prompt: str,
-    model: str = "gpt-5.4-nano",
+    model: str = DEFAULT_CHAT_MODEL,
     response_format: Optional[dict[str, Any]] = None,
     temperature: float = 0.2,
     max_tokens: int = 2000,

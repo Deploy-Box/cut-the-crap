@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.config.database import get_pool
-from app.services.recipe_service import call_openai_chat
+from app.services.recipe_service import DEFAULT_CHAT_MODEL, call_openai_chat
 from app.utils.logger import logger
 
 # ── constraints ──────────────────────────────────────────────────────
@@ -194,7 +194,7 @@ async def generate_meal_plan(
     result = await call_openai_chat(
         text=prompt_text,
         system_prompt=MEAL_PLAN_SYSTEM_PROMPT,
-        model="gpt-5.4-nano",
+        model=DEFAULT_CHAT_MODEL,
         response_format=MEAL_PLAN_RESPONSE_FORMAT,
         temperature=0.3,
         max_tokens=4000,
