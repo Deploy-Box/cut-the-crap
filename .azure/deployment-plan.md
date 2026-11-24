@@ -20,6 +20,8 @@ Status: Validated
 - Release increment: enable the existing API routes on the Function hostname and import the unchanged legacy A record into Terraform state. Verify extraction and auth against the Azure hostname before removing or replacing that A record.
 - GitHub Actions run 45469206085 enabled the API and imported the A record. A subsequent review found an arbitrary OAuth callback redirect; the user approved restricting redirects to the configured website and `cutthecrap://auth`. The deployment cancellation attempt returned GitHub HTTP 403, so the Function remains publicly reachable while the fix is deployed.
 - The authentication fix rejects untrusted redirect destinations both at login and callback, defaults to the website's `/auth` route, and stops logging authorization codes. The backend suite passes 195 tests.
+- The shared extraction proxy returns HTTP 500 for structured output with `gpt-5.4-nano`; the user chose `gpt-4o-mini`, which successfully extracted a real recipe through the deployed Function. The 196-test backend suite passed and GitHub Actions run 45474419289 deployed the fix.
+- DNS transition first removes only the imported `cutthecrap` A record pointing to the deallocated VM. The following deployment creates a CNAME to the Function, then provisions and binds a site-scoped managed certificate. DNS resolution and HTTPS will be unavailable between these steps and until Azure completes issuance and propagation. The user approved replacing this specific record and the temporary HTTPS gap. Shared infrastructure and PostgreSQL are untouched.
 
 ### Cutover increment validation
 
@@ -33,6 +35,9 @@ Status: Validated
 
 ### Section 7: Validation Proof
 
+- On 2026-11-24, the production Terraform plan for the first DNS increment showed exactly one destruction: the approved `cutthecrap` A record; no additions or other changes. The Terraform preflight passed init, formatting, validation, remote plan, state access, and template checks. Applicable policy assignments were checked; the MFA delete policy targets user identities, not the deployment service principal.
+- Commands: `terraform -chdir=terraform plan -input=false -var-file=tfvars/main.tfvars -no-color`; session preflight `validate-terraform-corrected.ps1 -InfraDir <workspace>/terraform` with `TF_CLI_ARGS_plan` selecting `tfvars/main.tfvars`; `python -m pytest -q` in the Python 3.12 backend environment; `az policy assignment list` at the production resource-group scope.
+- The website is a static export built using Node 22; the Function runs Python 3.12. Backend tests passed (196), and Actions run 45474419289 passed its website and backend checks.
 - The Terraform preflight passed against the production backend and tfvars. The authentication increment has no Terraform changes; the earlier release imported one unchanged A record and updated the Function and verification TXT in place.
 - Function identity role assignments are unchanged; the deployment identity retains Contributor and RBAC Administrator in the application resource group. No resource-group-level policy assignments were reported.
 - On 2026-11-24, Python 3.12 backend tests: 188 passed, including a real local TLS handshake and redirect/address checks. Website lint, typecheck, two tests, and static build passed with Node 22.16.0. The deployed website is static and has no Node server runtime.
