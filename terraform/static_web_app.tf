@@ -4,6 +4,10 @@ resource "azurerm_static_web_app" "this" {
   location            = var.static_web_app_location
   sku_tier            = "Free"
   sku_size            = "Free"
+
+  lifecycle {
+    ignore_changes = [repository_url, repository_branch]
+  }
 }
 
 resource "azurerm_dns_cname_record" "static_web_app" {
@@ -18,6 +22,11 @@ resource "azurerm_static_web_app_custom_domain" "this" {
   static_web_app_id = azurerm_static_web_app.this.id
   domain_name       = var.domain_name
   validation_type   = "cname-delegation"
+
+  lifecycle {
+    # Azure does not return the creation-only validation type after import.
+    ignore_changes = [validation_type]
+  }
 
   depends_on = [azurerm_dns_cname_record.static_web_app]
 }

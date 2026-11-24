@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -11,6 +12,9 @@ def _setup_logger() -> logging.Logger:
 
     log = logging.getLogger("app")
     log.setLevel(getattr(logging, settings.log_level.upper(), logging.INFO))
+
+    if os.environ.get("FUNCTIONS_WORKER_RUNTIME") == "python":
+        return log
 
     # Console handler with colour-friendly format
     # Use UTF-8 stream to avoid UnicodeEncodeError on Windows (cp1252)

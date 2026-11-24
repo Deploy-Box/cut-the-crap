@@ -32,6 +32,7 @@ env:
 jobs:
   # ── Step 1: Build images and push to ACR ───────────────────────────────
   build-and-push:
+    if: github.ref_name != 'main'
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     env:

@@ -2,6 +2,7 @@
 
 import base64
 import json
+from pathlib import Path
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -76,6 +77,82 @@ class TestStatusEndpoint:
         data = response.json()
         assert "Cut The Crap" in data["message"]
         assert data["version"] == "1.0.0"
+
+
+class TestAzureFunctionsAdapter:
+    @pytest.mark.asyncio
+    async def test_preserves_api_routes_and_authentication(self):
+        import azure.functions as func
+        import function_app
+
+        host = json.loads((Path(__file__).parent.parent / "host.json").read_text())
+        assert host["extensions"]["http"]["routePrefix"] == ""
+
+        trigger = function_app.app.get_functions()[0]
+        binding = json.loads(trigger.get_function_json())["bindings"][0]
+        assert binding["authLevel"] == "ANONYMOUS"
+        assert binding["route"] == "/{*route}"
+
+        invoke = trigger.get_user_function()
+        with (
+            patch("app.main.get_pool", new_callable=AsyncMock) as get_pool,
+            patch("app.main.close_pool", new_callable=AsyncMock) as close_pool,
+        ):
+            try:
+                status = await invoke(
+                    func.HttpRequest(
+                        method="GET",
+                        url="https://example.test/api/v1/status",
+                        headers={},
+                        body=b"",
+                    ),
+                    None,
+                )
+                assert status.status_code == 200
+                assert json.loads(status.get_body())["version"] == "1.0.0"
+
+                protected = await invoke(
+                    func.HttpRequest(
+                        method="GET",
+                        url="https://example.test/api/v1/recipes",
+                        headers={},
+                        body=b"",
+                    ),
+                    None,
+                )
+                assert protected.status_code == 401
+
+                invalid = await invoke(
+                    func.HttpRequest(
+                        method="POST",
+                        url="https://example.test/api/v1/chatgpt/parse-url",
+                        headers={"content-type": "application/json"},
+                        body=b"{}",
+                    ),
+                    None,
+                )
+                assert invalid.status_code == 422
+                get_pool.assert_awaited_once()
+            finally:
+                if function_app.app.startup_task_done:
+                    await function_app.app.middleware.notify_shutdown()
+                    function_app.app.startup_task_done = False
+            close_pool.assert_awaited_once()
+
+    def test_preview_mode_only_allows_readiness_endpoints(self):
+        from app.main import settings
+
+        with (
+            patch.object(settings, "functions_preview_mode", True),
+            patch("app.main.get_pool", new_callable=AsyncMock) as get_pool,
+        ):
+            get_pool.return_value.fetchval.return_value = 1
+            client = _get_test_client()
+            assert client.get("/api/v1/status").status_code == 200
+            assert client.get("/api/health").status_code == 200
+            assert client.get("/api/v1/recipes").status_code == 503
+            assert client.post("/api/v1/chatgpt/parse-url", json={}).status_code == 503
+            assert client.post("/api/v1/status").status_code == 503
 
 
 class TestNotFoundHandler:
@@ -278,7 +355,7 @@ class TestRecipeRoutes:
 
     @patch("app.routes.recipes.svc.create_saved_recipe")
     @patch("app.routes.recipes.svc.count_saved_recipes", new_callable=AsyncMock, return_value=0)
-    @patch("app.routes.recipes.is_pro", new_callable=AsyncMock, return_value=False)
+    @patch("app.routes.recipes.is_entitled", new_callable=AsyncMock, return_value=False)
     def test_save_recipe(self, _mock_pro, _mock_count, mock_create):
         mock_create.return_value = {
             "id": "new-1",

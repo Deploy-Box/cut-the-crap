@@ -94,6 +94,18 @@ async def log_requests(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def restrict_functions_preview(request: Request, call_next):
+    if settings.functions_preview_mode and (
+        request.method != "GET" or request.url.path not in {"/api/health", "/api/v1/status"}
+    ):
+        return JSONResponse(
+            status_code=503,
+            content={"error": "API is not available during deployment verification"},
+        )
+    return await call_next(request)
+
+
 # ── health check ─────────────────────────────────────────────────────
 
 

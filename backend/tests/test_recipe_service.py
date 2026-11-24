@@ -413,6 +413,7 @@ class TestGetSavedRecipes:
                     "title": "Pasta",
                     "source_url": "https://example.com",
                     "created_at": "2025-01-01",
+                    "folder_id": None,
                 }
             )
         ]
@@ -465,6 +466,7 @@ class TestCreateSavedRecipe:
                 "title": "New Recipe",
                 "source_url": "https://new.com",
                 "created_at": "2025-06-01",
+                "folder_id": None,
             }
         )
         result = await create_saved_recipe(user_id="user-1", title="New Recipe")

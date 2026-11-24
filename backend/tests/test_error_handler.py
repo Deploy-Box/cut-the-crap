@@ -108,3 +108,17 @@ class TestGenericErrorHandler:
 
         assert response.status_code == 500
         assert b"Internal Server Error" in response.body
+
+
+def test_functions_logging_uses_host_handlers_without_creating_files():
+    from app.utils.logger import _setup_logger
+
+    with (
+        patch.dict("os.environ", {"FUNCTIONS_WORKER_RUNTIME": "python"}),
+        patch("app.utils.logger.logging.getLogger") as get_logger,
+        patch("app.utils.logger.Path.mkdir") as mkdir,
+        patch("app.utils.logger.RotatingFileHandler") as file_handler,
+    ):
+        assert _setup_logger() is get_logger.return_value
+        mkdir.assert_not_called()
+        file_handler.assert_not_called()

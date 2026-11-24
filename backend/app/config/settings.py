@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     port: int = 8000
     environment: str = "development"
     log_level: str = "info"
+    functions_preview_mode: bool = False
 
     # Database
     postgres_connection_string: str = "postgresql://devuser:devpassword@localhost:5432/cutthecrap_dev"
