@@ -9,7 +9,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "Resource group location"
+  description = "Location of the application Key Vault"
   type        = string
 }
 
@@ -20,6 +20,11 @@ variable "static_web_app_name" {
 
 variable "static_web_app_location" {
   description = "Azure Static Web App region"
+  type        = string
+}
+
+variable "key_vault_name" {
+  description = "Globally unique name of the production application Key Vault"
   type        = string
 }
 

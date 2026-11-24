@@ -1,6 +1,6 @@
 resource "azurerm_static_web_app" "this" {
   name                = var.static_web_app_name
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = data.azurerm_resource_group.this.name
   location            = var.static_web_app_location
   sku_tier            = "Free"
   sku_size            = "Free"

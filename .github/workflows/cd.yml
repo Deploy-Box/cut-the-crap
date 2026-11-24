@@ -18,8 +18,8 @@ env:
 #   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
 #     — OIDC service principal for Azure Login (needed before KV access)
 #
-# All other secrets are fetched from Azure Key Vault (kv-kalebwbishop-apps).
-# App secrets use the "ctc-" prefix. Shared VM secrets use the "core-" prefix.
+# App secrets are fetched from the app Key Vault once CTC_APP_KEY_VAULT_READY
+# is true for main. Shared VM secrets remain in kv-kalebwbishop-apps.
 #
 # Infrastructure (VM, networking, DNS) is managed by kalebwbishop-apps-core.
 #
@@ -34,6 +34,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
+    env:
+      APP_KEY_VAULT: ${{ github.ref_name == 'main' && vars.CTC_APP_KEY_VAULT_READY == 'true' && 'kv-cutthecrap-prod' || 'kv-kalebwbishop-apps' }}
     permissions:
       id-token: write
       contents: read
@@ -85,7 +87,7 @@ jobs:
           NO_MASK="ctc-acr-login-server ctc-domain-name"
           for secret in ctc-acr-login-server ctc-acr-username ctc-acr-password ctc-domain-name; do
             key=$(echo "$secret" | sed 's/^ctc-//' | tr '-' '_' | tr '[:lower:]' '[:upper:]')
-            value=$(az keyvault secret show --vault-name ${{ env.KEY_VAULT }} --name "$secret" --query value -o tsv)
+            value=$(az keyvault secret show --vault-name "$APP_KEY_VAULT" --name "$secret" --query value -o tsv)
             if ! echo "$NO_MASK" | grep -qw "$secret"; then
               echo "::add-mask::$value"
             fi
@@ -120,6 +122,8 @@ jobs:
   deploy-application:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
+    env:
+      APP_KEY_VAULT: ${{ github.ref_name == 'main' && vars.CTC_APP_KEY_VAULT_READY == 'true' && 'kv-cutthecrap-prod' || 'kv-kalebwbishop-apps' }}
     needs: [build-and-push]
     concurrency:
       group: deploy-box-vm
@@ -168,18 +172,28 @@ jobs:
 
       - name: Fetch secrets from Key Vault
         id: kv
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           NO_MASK="core-vm-hostname ctc-acr-login-server ctc-domain-name"
           BASE64_SECRETS="core-vm-ssh-private-key ctc-tls-fullchain ctc-tls-privkey"
 
-          for secret in core-vm-hostname core-vm-ssh-private-key \
+          secrets="core-vm-hostname core-vm-ssh-private-key \
                          ctc-tls-fullchain ctc-tls-privkey \
                          ctc-acr-login-server ctc-acr-username ctc-acr-password \
                          ctc-domain-name ctc-workos-api-key ctc-workos-client-id \
                          ctc-deploy-box-client-id ctc-deploy-box-client-secret ctc-chatgpt-api-base \
-                         ctc-postgres-host ctc-postgres-user ctc-postgres-password; do
+                         ctc-postgres-host ctc-postgres-user ctc-postgres-password"
+          if [ "$BRANCH" = "main" ]; then
+            secrets="$secrets ctc-prod-stripe-secret-key ctc-prod-stripe-webhook-secret ctc-prod-stripe-price-pro-monthly ctc-prod-stripe-price-pro-yearly"
+          fi
+          for secret in $secrets; do
             key=$(echo "$secret" | sed 's/^core-//' | sed 's/^ctc-//' | tr '-' '_' | tr '[:lower:]' '[:upper:]')
-            raw=$(az keyvault secret show --vault-name ${{ env.KEY_VAULT }} --name "$secret" --query value -o tsv)
+            vault="$APP_KEY_VAULT"
+            if [[ "$secret" == core-* ]]; then
+              vault="$KEY_VAULT"
+            fi
+            raw=$(az keyvault secret show --vault-name "$vault" --name "$secret" --query value -o tsv)
 
             if echo "$BASE64_SECRETS" | grep -qw "$secret"; then
               value=$(echo "$raw" | base64 -d)
@@ -213,6 +227,12 @@ jobs:
           done
 
       - name: Write backend environment file
+        env:
+          BRANCH: ${{ github.ref_name }}
+          STRIPE_SECRET_KEY: ${{ steps.kv.outputs.PROD_STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ steps.kv.outputs.PROD_STRIPE_WEBHOOK_SECRET }}
+          STRIPE_PRICE_PRO_MONTHLY: ${{ steps.kv.outputs.PROD_STRIPE_PRICE_PRO_MONTHLY }}
+          STRIPE_PRICE_PRO_YEARLY: ${{ steps.kv.outputs.PROD_STRIPE_PRICE_PRO_YEARLY }}
         run: |
           FULL_DOMAIN="${{ steps.env.outputs.FULL_DOMAIN }}"
           DB_NAME="${{ steps.env.outputs.DB_NAME }}"
@@ -230,6 +250,18 @@ jobs:
           CORS_ORIGIN=https://${FULL_DOMAIN}
           FRONTEND_URL=https://${FULL_DOMAIN}
           ENVEOF
+          if [ "$BRANCH" = "main" ]; then
+            if [ -z "$STRIPE_SECRET_KEY" ] || [ -z "$STRIPE_WEBHOOK_SECRET" ] || [ -z "$STRIPE_PRICE_PRO_MONTHLY" ] || [ -z "$STRIPE_PRICE_PRO_YEARLY" ]; then
+              echo "Missing required production Stripe configuration in Key Vault." >&2
+              exit 1
+            fi
+            cat >> /tmp/backend.env << ENVEOF
+          STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+          STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+          STRIPE_PRICE_PRO_MONTHLY=${STRIPE_PRICE_PRO_MONTHLY}
+          STRIPE_PRICE_PRO_YEARLY=${STRIPE_PRICE_PRO_YEARLY}
+          ENVEOF
+          fi
 
       - name: Pull images and start containers
         env:
