@@ -251,6 +251,11 @@ jobs:
           DB_NAME: ${{ steps.env.outputs.DB_NAME }}
           FULL_DOMAIN: ${{ steps.env.outputs.FULL_DOMAIN }}
         run: |
+          CTC_CORS_ORIGIN="https://${FULL_DOMAIN}"
+          if [ "$BRANCH" = "main" ]; then
+            CTC_CORS_ORIGIN="${CTC_CORS_ORIGIN},https://ctc-web.deploy-box.com"
+          fi
+
           ssh azureuser@$VM_HOSTNAME << DEPLOY
           set -euo pipefail
 
@@ -297,6 +302,7 @@ jobs:
           sg docker -c "ACR_REGISTRY=${ACR_LOGIN_SERVER}/ IMAGE_TAG=${IMAGE_TAG} \
             CTC_BACKEND_ALIAS=$BACKEND_ALIAS CTC_FRONTEND_ALIAS=$FRONTEND_ALIAS \
             CTC_DOMAIN=$FULL_DOMAIN \
+            CTC_CORS_ORIGIN='$CTC_CORS_ORIGIN' \
             POSTGRES_CONNECTION_STRING='postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${DB_NAME}?sslmode=require' \
             docker compose -p $COMPOSE_PROJECT up -d --pull always --no-build --no-deps backend frontend" </dev/null
 

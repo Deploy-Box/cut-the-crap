@@ -1,0 +1,8 @@
+subscription_id              = "3d5d1ab2-b17f-4c99-9bf1-db4fe0ad882e"
+resource_group_name          = "rg-cutthecrap-web-prod"
+location                     = "eastus2"
+static_web_app_name          = "swa-cutthecrap-web-prod"
+static_web_app_location      = "eastus2"
+domain_name                  = "ctc-web.deploy-box.com"
+dns_zone_name                = "deploy-box.com"
+dns_zone_resource_group_name = "deploy-box-rg-prod"

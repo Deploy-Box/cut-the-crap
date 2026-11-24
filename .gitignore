@@ -20,6 +20,7 @@ logs/
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+!terraform/.terraform.lock.hcl
 terraform.tfvars
 *.auto.tfvars
 

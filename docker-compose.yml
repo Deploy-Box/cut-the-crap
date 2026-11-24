@@ -21,7 +21,7 @@ services:
     env_file: ./backend/.env
     environment:
       POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING:-postgresql://postgres:postgres@db:5432/${CTC_DB_NAME:-cutthecrap_dev}}
-      CORS_ORIGIN: https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}
+      CORS_ORIGIN: ${CTC_CORS_ORIGIN:-https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}}
       FRONTEND_URL: https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}
       WORKOS_REDIRECT_URI: https://${CTC_DOMAIN:-cutthecrap.deploy-box.com}/api/v1/auth/callback
     depends_on:
