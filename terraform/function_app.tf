@@ -171,3 +171,15 @@ resource "azurerm_dns_txt_record" "function_domain_verification" {
     value = data.azapi_resource.function_domain.output.properties.customDomainVerificationId
   }
 }
+
+resource "azurerm_app_service_custom_hostname_binding" "function" {
+  hostname            = "cutthecrap.deploy-box.com"
+  app_service_name    = azapi_resource.function.name
+  resource_group_name = data.azurerm_resource_group.this.name
+
+  lifecycle {
+    ignore_changes = [ssl_state, thumbprint]
+  }
+
+  depends_on = [azurerm_dns_txt_record.function_domain_verification]
+}
