@@ -16,6 +16,8 @@ Status: Validated
 - Automated checks for this increment: 188 backend tests passed and Terraform configuration validated. Public hostname, TLS, end-to-end integrations, and retirement remain subsequent increments.
 - GitHub Actions run 45466228027 deployed the restricted increment successfully. Function health returned 200, protected routes returned 503, and Azure DNS contains the ownership TXT record.
 - Next increment: bind the existing API hostname to the Function using the TXT record without changing its current A record. Terraform plans one addition and no changes or deletions. The existing legacy certificate expired on 2026-07-06; managed certificate issuance and DNS cutover remain separate.
+- The hostname binding has been provisioned. The user approved replacing the specific legacy A record and a temporary HTTPS gap, because Azure's managed certificate can only be issued after DNS is remapped.
+- Release increment: enable the existing API routes on the Function hostname and import the unchanged legacy A record into Terraform state. Verify extraction and auth against the Azure hostname before removing or replacing that A record.
 
 ### Cutover increment validation
 
@@ -29,7 +31,7 @@ Status: Validated
 
 ### Section 7: Validation Proof
 
-- The Terraform preflight passed against the production backend and tfvars. The current plan adds only the hostname binding, with no changes or deletions.
+- The Terraform preflight passed against the production backend and tfvars. The release plan imports one unchanged A record and updates the Function and verification TXT in place, with no additions or deletions.
 - Function identity role assignments are unchanged; the deployment identity retains Contributor and RBAC Administrator in the application resource group. No resource-group-level policy assignments were reported.
 - On 2026-11-24, Python 3.12 backend tests: 188 passed, including a real local TLS handshake and redirect/address checks. Website lint, typecheck, two tests, and static build passed with Node 22.16.0. The deployed website is static and has no Node server runtime.
 

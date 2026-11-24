@@ -100,7 +100,7 @@ jobs:
           package: backend
           respect-funcignore: true
           remote-build: true
-      - name: Verify API readiness and preview isolation
+      - name: Verify API readiness and authentication
         run: |
           host="$(az functionapp show --resource-group rg-cutthecrap-prod \
             --name func-cutthecrap-api-prod --query properties.defaultHostName -o tsv)"
@@ -112,11 +112,11 @@ jobs:
             if curl --silent --show-error --fail --max-time 20 "https://$host/api/health" > /dev/null; then
               status="$(curl --silent --show-error --max-time 20 --output /dev/null \
                 --write-out '%{http_code}' "https://$host/api/v1/recipes")"
-              if [ "$status" = "503" ]; then
-                echo "Function App is healthy and preview access is restricted."
+              if [ "$status" = "401" ]; then
+                echo "Function App is healthy and protected routes require authentication."
                 exit 0
               fi
-              echo "Preview access is not restricted (HTTP $status)." >&2
+              echo "Protected route did not require authentication (HTTP $status)." >&2
               exit 1
             fi
             echo "Waiting for Function App readiness ($attempt/36)..."

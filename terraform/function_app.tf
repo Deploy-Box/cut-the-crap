@@ -84,7 +84,7 @@ locals {
   function_settings = merge(
     {
       ENVIRONMENT                               = "production"
-      FUNCTIONS_PREVIEW_MODE                    = "true"
+      FUNCTIONS_PREVIEW_MODE                    = "false"
       POSTGRES_POOL_MIN_SIZE                    = "1"
       POSTGRES_POOL_MAX_SIZE                    = "5"
       FRONTEND_URL                              = "https://${var.domain_name}"
