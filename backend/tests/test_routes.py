@@ -2,7 +2,10 @@
 
 import base64
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -77,6 +80,27 @@ class TestStatusEndpoint:
         data = response.json()
         assert "Cut The Crap" in data["message"]
         assert data["version"] == "1.0.0"
+
+
+@pytest.mark.parametrize("platform_managed", [False, True])
+def test_cors_is_handled_by_only_one_layer(platform_managed):
+    env = os.environ.copy()
+    env.update(
+        ENVIRONMENT="production",
+        CORS_ORIGIN="https://site.test",
+        PLATFORM_MANAGED_CORS=str(platform_managed).lower(),
+    )
+    script = """
+from fastapi.testclient import TestClient
+from app.main import app
+response = TestClient(app).options(
+    "/api/v1/chatgpt/parse-url",
+    headers={"Origin": "https://site.test", "Access-Control-Request-Method": "POST"},
+)
+assert response.headers.get("access-control-allow-origin") == EXPECTED
+""".replace("EXPECTED", "None" if platform_managed else "'https://site.test'")
+    result = subprocess.run([sys.executable, "-c", script], env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
 
 
 class TestAzureFunctionsAdapter:

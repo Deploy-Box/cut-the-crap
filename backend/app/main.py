@@ -62,14 +62,14 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS — in dev mode with wildcard origins, disable credentials to comply with spec
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials="*" not in settings.cors_origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if not settings.platform_managed_cors:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials="*" not in settings.cors_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Exception handlers
 app.add_exception_handler(AppError, app_error_handler)

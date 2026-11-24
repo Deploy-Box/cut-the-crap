@@ -85,6 +85,7 @@ locals {
     {
       ENVIRONMENT                               = "production"
       FUNCTIONS_PREVIEW_MODE                    = "false"
+      PLATFORM_MANAGED_CORS                     = "true"
       POSTGRES_POOL_MIN_SIZE                    = "1"
       POSTGRES_POOL_MAX_SIZE                    = "5"
       FRONTEND_URL                              = "https://${var.domain_name}"
@@ -144,6 +145,10 @@ resource "azapi_resource" "function" {
       siteConfig = {
         minTlsVersion = "1.2"
         appSettings   = [for name, value in local.function_settings : { name = name, value = value }]
+        cors = {
+          allowedOrigins     = ["https://${var.domain_name}", "https://cutthecrap.deploy-box.com"]
+          supportCredentials = true
+        }
       }
     }
   }

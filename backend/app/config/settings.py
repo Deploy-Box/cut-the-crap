@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     log_level: str = "info"
     functions_preview_mode: bool = False
+    platform_managed_cors: bool = False
 
     # Database
     postgres_connection_string: str = "postgresql://devuser:devpassword@localhost:5432/cutthecrap_dev"
