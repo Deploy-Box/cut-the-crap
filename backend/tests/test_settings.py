@@ -61,3 +61,18 @@ class TestSettingsDefaults:
     def test_default_log_level(self):
         s = Settings()
         assert s.log_level == "info"
+
+    @pytest.mark.asyncio
+    async def test_database_pool_uses_configured_limits(self):
+        from unittest.mock import AsyncMock, patch
+        from app.config import database
+
+        settings = Settings(postgres_pool_min_size=1, postgres_pool_max_size=5)
+        with (
+            patch.object(database, "_pool", None),
+            patch.object(database, "get_settings", return_value=settings),
+            patch.object(database.asyncpg, "create_pool", new_callable=AsyncMock) as create_pool,
+        ):
+            await database.get_pool()
+            assert create_pool.await_args.kwargs["min_size"] == 1
+            assert create_pool.await_args.kwargs["max_size"] == 5

@@ -20,8 +20,8 @@ async def get_pool() -> asyncpg.Pool:
         settings = get_settings()
         _pool = await asyncpg.create_pool(
             dsn=settings.postgres_connection_string,
-            min_size=2,
-            max_size=20,
+            min_size=settings.postgres_pool_min_size,
+            max_size=settings.postgres_pool_max_size,
             command_timeout=30,
             connection_class=NoResetConnection,  # Use the custom connection class
         )

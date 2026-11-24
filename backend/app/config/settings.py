@@ -13,6 +13,8 @@ class Settings(BaseSettings):
 
     # Database
     postgres_connection_string: str = "postgresql://devuser:devpassword@localhost:5432/cutthecrap_dev"
+    postgres_pool_min_size: int = 2
+    postgres_pool_max_size: int = 20
 
     # Frontend
     frontend_url: str = "http://localhost:8081"

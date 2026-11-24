@@ -1,6 +1,35 @@
 # Azure deployment plan
 
-Status: Ready for Validation
+Status: Validated
+
+## Legacy cutover planning
+
+- Retire Cut The Crap-specific legacy production, dev, and test deployments only; preserve shared infrastructure and PostgreSQL.
+- Adopt `cutthecrap.deploy-box.com` as the new API hostname; preserve compatibility for installed mobile clients.
+- The legacy DNS A record points to the deallocated shared VM. The Function is healthy but only exposes health and status in preview mode. The website and legacy mobile builds may already use the chosen hostname.
+- The Functions ASGI adapter does not provide a client address; existing in-process, per-IP limits are not reliable on Functions. The user explicitly deferred rate limiting until later. Preserve the existing limiter without treating it as effective production protection; do not trust unverified forwarding headers. This creates a known abuse and cost risk.
+- Verify custom-domain ownership, TLS, WorkOS callbacks, billing webhooks, extraction, authentication, PostgreSQL connection budgets, and client compatibility before DNS cutover. Preserve rollback until verified.
+- Retire the old VM workflow and app-specific dev/test components only after verifying the replacement; separately confirm each destructive operation. Preserve the shared VM, networking, registry, vault, and database server.
+- Deploy infrastructure through GitHub Actions only. Obtain resource-specific confirmation before destructive changes.
+- First increment: configure the retained WorkOS callback, add a DNS ownership TXT record, and limit each Functions worker's database pool to five connections while retaining preview mode. The 40-instance HTTP scale ceiling and one default Python worker imply up to 200 application pool connections against the shared server's 429-connection limit; other workloads and worker-count overrides still require monitoring.
+- URL and robots.txt fetching now resolves and pins public addresses per request, including redirects, while retaining the original HTTPS hostname for certificate verification. Public cutover remains blocked until this is deployed and verified.
+- Automated checks for this increment: 188 backend tests passed and Terraform configuration validated. Public hostname, TLS, end-to-end integrations, and retirement remain subsequent increments.
+
+### Cutover increment validation
+
+- [x] All validation checks pass:
+  - [x] Terraform and Azure CLI installed; Azure authentication and target subscription confirmed.
+  - [x] Terraform init, format, validation, plan, and state access.
+  - [x] Template-variable scan and applicable tfvars syntax checks.
+  - [x] Azure policy and static RBAC review.
+  - [x] Application build and tests.
+  - [x] Node runtime support checked for the deployed website.
+
+### Section 7: Validation Proof
+
+- The Terraform preflight passed against the production backend and tfvars. The updated plan creates the domain verification TXT record and changes the Function App in place, with no deletions.
+- Function identity role assignments are unchanged; the deployment identity retains Contributor and RBAC Administrator in the application resource group. No resource-group-level policy assignments were reported.
+- On 2026-11-24, Python 3.12 backend tests: 188 passed, including a real local TLS handshake and redirect/address checks. Website lint, typecheck, two tests, and static build passed with Node 22.16.0. The deployed website is static and has no Node server runtime.
 
 ## Target
 

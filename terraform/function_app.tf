@@ -85,9 +85,11 @@ locals {
     {
       ENVIRONMENT                               = "production"
       FUNCTIONS_PREVIEW_MODE                    = "true"
+      POSTGRES_POOL_MIN_SIZE                    = "1"
+      POSTGRES_POOL_MAX_SIZE                    = "5"
       FRONTEND_URL                              = "https://${var.domain_name}"
       CORS_ORIGIN                               = "https://${var.domain_name},https://cutthecrap.deploy-box.com"
-      WORKOS_REDIRECT_URI                       = "https://ctc-api.deploy-box.com/api/v1/auth/callback"
+      WORKOS_REDIRECT_URI                       = "https://cutthecrap.deploy-box.com/api/v1/auth/callback"
       AzureWebJobsStorage__accountName          = azurerm_storage_account.function.name
       AzureWebJobsStorage__credential           = "managedidentity"
       AzureWebJobsStorage__clientId             = azurerm_user_assigned_identity.function.client_id
@@ -151,4 +153,21 @@ resource "azapi_resource" "function" {
     azurerm_role_assignment.function_vault,
     azurerm_role_assignment.function_monitoring,
   ]
+}
+
+data "azapi_resource" "function_domain" {
+  type                   = "Microsoft.Web/sites@2024-11-01"
+  resource_id            = azapi_resource.function.id
+  response_export_values = ["properties.customDomainVerificationId"]
+}
+
+resource "azurerm_dns_txt_record" "function_domain_verification" {
+  name                = "asuid.cutthecrap"
+  zone_name           = var.dns_zone_name
+  resource_group_name = var.dns_zone_resource_group_name
+  ttl                 = 300
+
+  record {
+    value = data.azapi_resource.function_domain.output.properties.customDomainVerificationId
+  }
 }
