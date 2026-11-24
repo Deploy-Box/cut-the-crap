@@ -303,6 +303,21 @@ class TestCallOpenaiChat:
 
 class TestFetchAndExtract:
     @pytest.mark.asyncio
+    @patch("app.services.robots_service.is_allowed", new_callable=AsyncMock, return_value=True)
+    @patch("app.services.recipe_service.httpx.AsyncClient")
+    async def test_private_redirect_returns_bad_request(self, mock_client_cls, _mock_robots):
+        from app.services.public_url_transport import UnsafeDestinationError
+
+        mock_client = AsyncMock()
+        mock_client.get.side_effect = UnsafeDestinationError("non-public")
+        mock_client.__aenter__.return_value = mock_client
+        mock_client_cls.return_value = mock_client
+
+        result = await fetch_and_extract("https://example.com/recipe")
+        assert result["status_code"] == 400
+        assert "private" in result["error"]
+
+    @pytest.mark.asyncio
     @patch("app.services.recipe_service.httpx.AsyncClient")
     async def test_successful_fetch(self, mock_client_cls):
         mock_response = MagicMock()
@@ -382,6 +397,126 @@ class TestFetchAndExtract:
         result = await fetch_and_extract("https://empty.example.com")
         assert result["ok"] is False
         assert "no readable text" in result["error"].lower()
+
+
+class TestPublicURLTransport:
+    @pytest.mark.asyncio
+    async def test_pinned_https_verifies_original_hostname(self, tmp_path):
+        import asyncio
+        import ssl
+        from datetime import datetime, timedelta, timezone
+        import httpx
+        from cryptography import x509
+        from cryptography.hazmat.primitives import hashes, serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from cryptography.x509.oid import NameOID
+        from app.services.public_url_transport import PublicURLTransport
+
+        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "example.com")])
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(name).issuer_name(name).public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.now(timezone.utc) - timedelta(minutes=1))
+            .not_valid_after(datetime.now(timezone.utc) + timedelta(days=1))
+            .add_extension(x509.SubjectAlternativeName([x509.DNSName("example.com")]), False)
+            .sign(key, hashes.SHA256())
+        )
+        cert_path = tmp_path / "cert.pem"
+        key_path = tmp_path / "key.pem"
+        cert_path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+        key_path.write_bytes(key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.TraditionalOpenSSL,
+            serialization.NoEncryption(),
+        ))
+        server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        server_context.load_cert_chain(cert_path, key_path)
+        client_context = ssl.create_default_context(cafile=str(cert_path))
+
+        async def respond(reader, writer):
+            await reader.readuntil(b"\r\n\r\n")
+            writer.write(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nOK")
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_server(respond, "127.0.0.1", 0, ssl=server_context)
+        port = server.sockets[0].getsockname()[1]
+        try:
+            with patch.object(PublicURLTransport, "_resolve_public_address", new_callable=AsyncMock, return_value="127.0.0.1"):
+                async with httpx.AsyncClient(transport=PublicURLTransport(verify=client_context)) as client:
+                    response = await client.get(f"https://example.com:{port}/")
+                    assert response.text == "OK"
+                    with pytest.raises(httpx.ConnectError):
+                        await client.get(f"https://different.example:{port}/")
+        finally:
+            server.close()
+            await server.wait_closed()
+
+    @pytest.mark.asyncio
+    async def test_pins_public_resolution_and_preserves_host_and_tls_name(self):
+        import asyncio
+        import httpx
+        import socket
+        from app.services.public_url_transport import PublicURLTransport
+
+        transport = PublicURLTransport()
+        await transport._transport.aclose()
+        observed = []
+        transport._transport = httpx.MockTransport(
+            lambda request: observed.append(request) or httpx.Response(200, text="ok")
+        )
+        resolved = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 443))]
+        with patch.object(asyncio.get_running_loop(), "getaddrinfo", new_callable=AsyncMock, return_value=resolved):
+            async with httpx.AsyncClient(transport=transport) as client:
+                response = await client.get("https://example.com/recipe")
+
+        assert response.text == "ok"
+        assert observed[0].url.host == "1.1.1.1"
+        assert observed[0].headers["host"] == "example.com"
+        assert observed[0].extensions["sni_hostname"] == "example.com"
+        assert str(response.url) == "https://example.com/recipe"
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("ip", ["127.0.0.1", "169.254.169.254", "168.63.129.16", "::1"])
+    async def test_blocks_internal_dns_answers(self, ip):
+        import asyncio
+        import httpx
+        import socket
+        from app.services.public_url_transport import PublicURLTransport
+
+        transport = PublicURLTransport()
+        resolved = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, 80))]
+        with patch.object(asyncio.get_running_loop(), "getaddrinfo", new_callable=AsyncMock, return_value=resolved):
+            async with httpx.AsyncClient(transport=transport) as client:
+                with pytest.raises(httpx.ConnectError, match="non-public"):
+                    await client.get("http://attacker.example/")
+
+    @pytest.mark.asyncio
+    async def test_blocks_redirect_to_internal_destination(self):
+        import asyncio
+        import httpx
+        import socket
+        from app.services.public_url_transport import PublicURLTransport
+
+        transport = PublicURLTransport()
+        await transport._transport.aclose()
+        requests = []
+        transport._transport = httpx.MockTransport(
+            lambda request: requests.append(request)
+            or httpx.Response(302, headers={"Location": "http://internal.example/"})
+        )
+
+        async def resolve(host, port, **kwargs):
+            ip = "1.1.1.1" if host == "example.com" else "127.0.0.1"
+            return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, port))]
+
+        with patch.object(asyncio.get_running_loop(), "getaddrinfo", side_effect=resolve):
+            async with httpx.AsyncClient(transport=transport, follow_redirects=True) as client:
+                with pytest.raises(httpx.ConnectError, match="non-public"):
+                    await client.get("https://example.com/")
+        assert len(requests) == 1
 
 
 # ═════════════════════════════════════════════════════════════════════

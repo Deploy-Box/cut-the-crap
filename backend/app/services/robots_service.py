@@ -13,6 +13,7 @@ from urllib.robotparser import RobotFileParser
 
 import httpx
 
+from app.services.public_url_transport import PublicURLTransport
 from app.utils.logger import logger
 
 # Cache robots.txt results for 1 hour
@@ -56,7 +57,8 @@ async def _fetch_robots(robots_url: str, *, verify_ssl: bool = True) -> RobotFil
         async with httpx.AsyncClient(
             timeout=_ROBOTS_TIMEOUT,
             follow_redirects=True,
-            verify=verify_ssl,
+            transport=PublicURLTransport(verify=verify_ssl),
+            trust_env=False,
         ) as client:
             resp = await client.get(robots_url)
 

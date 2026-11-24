@@ -14,6 +14,7 @@ import httpx
 
 from app.config.database import get_pool
 from app.config.settings import get_settings
+from app.services.public_url_transport import PublicURLTransport, UnsafeDestinationError
 from app.utils.logger import logger
 
 # ── constants ────────────────────────────────────────────────────────
@@ -354,9 +355,12 @@ async def fetch_and_extract(url: str) -> dict[str, Any]:
             timeout=FETCH_TIMEOUT,
             follow_redirects=True,
             headers=FETCH_HEADERS,
-            verify=not settings.is_dev,
+            transport=PublicURLTransport(verify=not settings.is_dev),
+            trust_env=False,
         ) as client:
             resp = await client.get(url)
+    except UnsafeDestinationError:
+        return {"ok": False, "error": "URLs pointing to internal/private networks are not allowed.", "status_code": 400}
     except httpx.TimeoutException:
         return {"ok": False, "error": "Timed out fetching the URL.", "status_code": 408}
     except httpx.RequestError as exc:
