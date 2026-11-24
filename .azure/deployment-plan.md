@@ -22,6 +22,7 @@ Status: Validated
 - The authentication fix rejects untrusted redirect destinations both at login and callback, defaults to the website's `/auth` route, and stops logging authorization codes. The backend suite passes 195 tests.
 - The shared extraction proxy returns HTTP 500 for structured output with `gpt-5.4-nano`; the user chose `gpt-4o-mini`, which successfully extracted a real recipe through the deployed Function. The 196-test backend suite passed and GitHub Actions run 45474419289 deployed the fix.
 - DNS transition first removes only the imported `cutthecrap` A record pointing to the deallocated VM. The following deployment creates a CNAME to the Function, then provisions and binds a site-scoped managed certificate. DNS resolution and HTTPS will be unavailable between these steps and until Azure completes issuance and propagation. The user approved replacing this specific record and the temporary HTTPS gap. Shared infrastructure and PostgreSQL are untouched.
+- The CNAME targets the Function's Azure-provided hostname. A site-scoped App Service managed certificate is requested after the CNAME and existing hostname binding, then bound with SNI. Issuance depends on public DNS propagation and may need a subsequent retry; no live certificate has yet been issued or verified.
 
 ### Cutover increment validation
 
@@ -35,6 +36,7 @@ Status: Validated
 
 ### Section 7: Validation Proof
 
+- On 2026-11-24, after GitHub Actions removed the A record, the production Terraform plan for the CNAME and TLS increment showed three additions (CNAME, site-scoped certificate, SNI binding), no changes, and no deletions. The Terraform preflight passed init, formatting, validation, plan, state access, and template checks using the commands below. The existing GitHub Actions build and 196 backend tests passed; the increment changes no application code or role assignments.
 - On 2026-11-24, the production Terraform plan for the first DNS increment showed exactly one destruction: the approved `cutthecrap` A record; no additions or other changes. The Terraform preflight passed init, formatting, validation, remote plan, state access, and template checks. Applicable policy assignments were checked; the MFA delete policy targets user identities, not the deployment service principal.
 - Commands: `terraform -chdir=terraform plan -input=false -var-file=tfvars/main.tfvars -no-color`; session preflight `validate-terraform-corrected.ps1 -InfraDir <workspace>/terraform` with `TF_CLI_ARGS_plan` selecting `tfvars/main.tfvars`; `python -m pytest -q` in the Python 3.12 backend environment; `az policy assignment list` at the production resource-group scope.
 - The website is a static export built using Node 22; the Function runs Python 3.12. Backend tests passed (196), and Actions run 45474419289 passed its website and backend checks.

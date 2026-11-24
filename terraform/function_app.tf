@@ -158,7 +158,7 @@ resource "azapi_resource" "function" {
 data "azapi_resource" "function_domain" {
   type                   = "Microsoft.Web/sites@2024-11-01"
   resource_id            = azapi_resource.function.id
-  response_export_values = ["properties.customDomainVerificationId"]
+  response_export_values = ["properties.customDomainVerificationId", "properties.defaultHostName"]
 }
 
 resource "azurerm_dns_txt_record" "function_domain_verification" {
@@ -182,4 +182,33 @@ resource "azurerm_app_service_custom_hostname_binding" "function" {
   }
 
   depends_on = [azurerm_dns_txt_record.function_domain_verification]
+}
+
+resource "azapi_resource" "function_certificate" {
+  type      = "Microsoft.Web/sites/certificates@2024-11-01"
+  name      = "cutthecrap.deploy-box.com"
+  parent_id = azapi_resource.function.id
+  location  = var.location
+
+  body = {
+    properties = {
+      canonicalName = azurerm_app_service_custom_hostname_binding.function.hostname
+      serverFarmId  = azurerm_service_plan.function.id
+    }
+  }
+
+  response_export_values = ["properties.thumbprint"]
+  depends_on             = [azurerm_dns_cname_record.api]
+}
+
+resource "azapi_update_resource" "function_certificate_binding" {
+  type        = "Microsoft.Web/sites/hostNameBindings@2024-11-01"
+  resource_id = azurerm_app_service_custom_hostname_binding.function.id
+
+  body = {
+    properties = {
+      sslState   = "SniEnabled"
+      thumbprint = azapi_resource.function_certificate.output.properties.thumbprint
+    }
+  }
 }
