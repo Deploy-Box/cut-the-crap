@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 import base64
 import json
-from urllib.parse import quote, urlencode
+from urllib.parse import parse_qsl, quote, urlencode, urlsplit
 
 from app.config.settings import get_settings
 from app.config.workos_client import get_workos_client
@@ -14,6 +14,34 @@ from app.utils.logger import logger
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _is_allowed_redirect(uri: str, settings) -> bool:
+    if any(ord(char) < 32 or ord(char) == 127 for char in uri):
+        return False
+    try:
+        parsed = urlsplit(uri)
+        if parsed.fragment or parsed.username or parsed.password:
+            return False
+        port = parsed.port
+        if any(key.lower() == "code" for key, _ in parse_qsl(parsed.query, keep_blank_values=True)):
+            return False
+    except ValueError:
+        return False
+
+    if uri == settings.frontend_url.rstrip("/") + "/auth":
+        return True
+    if parsed.scheme == "cutthecrap":
+        return port is None and (
+            (parsed.netloc == "auth" and parsed.path in ("", "/"))
+            or (not parsed.netloc and parsed.path == "/auth")
+        )
+    if settings.is_dev:
+        return parsed.scheme in ("exp", "exps") or (
+            parsed.scheme in ("http", "https")
+            and parsed.hostname in ("localhost", "127.0.0.1", "::1")
+        )
+    return False
 
 
 # ── request / response models ────────────────────────────────────────
@@ -51,6 +79,8 @@ async def login(redirect_uri: Optional[str] = None):
     """
     try:
         settings = get_settings()
+        if redirect_uri and not _is_allowed_redirect(redirect_uri, settings):
+            return JSONResponse(status_code=400, content={"error": "Invalid redirect URI"})
         workos = get_workos_client()
 
         # Encode the mobile redirect into state so the callback can use it
@@ -90,7 +120,7 @@ async def callback(code: Optional[str] = None, state: Optional[str] = None):
 
     # Determine where to redirect: deep-link from state, or default frontend URL
     settings = get_settings()
-    redirect_target = settings.frontend_url + "/home"
+    redirect_target = settings.frontend_url.rstrip("/") + "/auth"
 
     if state:
         try:
@@ -99,14 +129,15 @@ async def callback(code: Optional[str] = None, state: Optional[str] = None):
             payload = json.loads(base64.urlsafe_b64decode(padded))
             custom_redirect = payload.get("redirect_uri")
             if custom_redirect:
+                if not isinstance(custom_redirect, str) or not _is_allowed_redirect(custom_redirect, settings):
+                    return JSONResponse(status_code=400, content={"error": "Invalid redirect URI"})
                 redirect_target = custom_redirect
-                logger.info("Decoded redirect_uri from state: %s", redirect_target)
         except Exception:
             logger.warning("Failed to decode state parameter, using default redirect", exc_info=True)
 
     separator = "&" if "?" in redirect_target else "?"
     final_url = f"{redirect_target}{separator}code={quote(code, safe='')}"
-    logger.info("Callback redirecting (302) to: %s", final_url)
+    logger.info("Callback redirecting to the application")
 
     # Use a 302 redirect. ASWebAuthenticationSession on iOS intercepts HTTP
     # redirects to custom URL schemes (exp://, dwellary://) and closes the

@@ -18,6 +18,8 @@ Status: Validated
 - Next increment: bind the existing API hostname to the Function using the TXT record without changing its current A record. Terraform plans one addition and no changes or deletions. The existing legacy certificate expired on 2026-07-06; managed certificate issuance and DNS cutover remain separate.
 - The hostname binding has been provisioned. The user approved replacing the specific legacy A record and a temporary HTTPS gap, because Azure's managed certificate can only be issued after DNS is remapped.
 - Release increment: enable the existing API routes on the Function hostname and import the unchanged legacy A record into Terraform state. Verify extraction and auth against the Azure hostname before removing or replacing that A record.
+- GitHub Actions run 45469206085 enabled the API and imported the A record. A subsequent review found an arbitrary OAuth callback redirect; the user approved restricting redirects to the configured website and `cutthecrap://auth`. The deployment cancellation attempt returned GitHub HTTP 403, so the Function remains publicly reachable while the fix is deployed.
+- The authentication fix rejects untrusted redirect destinations both at login and callback, defaults to the website's `/auth` route, and stops logging authorization codes. The backend suite passes 195 tests.
 
 ### Cutover increment validation
 
@@ -31,7 +33,7 @@ Status: Validated
 
 ### Section 7: Validation Proof
 
-- The Terraform preflight passed against the production backend and tfvars. The release plan imports one unchanged A record and updates the Function and verification TXT in place, with no additions or deletions.
+- The Terraform preflight passed against the production backend and tfvars. The authentication increment has no Terraform changes; the earlier release imported one unchanged A record and updated the Function and verification TXT in place.
 - Function identity role assignments are unchanged; the deployment identity retains Contributor and RBAC Administrator in the application resource group. No resource-group-level policy assignments were reported.
 - On 2026-11-24, Python 3.12 backend tests: 188 passed, including a real local TLS handshake and redirect/address checks. Website lint, typecheck, two tests, and static build passed with Node 22.16.0. The deployed website is static and has no Node server runtime.
 

@@ -171,6 +171,51 @@ class TestNotFoundHandler:
 
 
 class TestAuthCallback:
+    @pytest.mark.parametrize("redirect", [
+        "https://evil.example/auth",
+        "https://ctc-web.deploy-box.com.evil.example/auth",
+        "cutthecrap://evil",
+        "cutthecrap://auth?code=attacker",
+    ])
+    def test_rejects_untrusted_callback_destinations(self, redirect):
+        from app.config.settings import Settings
+
+        settings = Settings(environment="production", frontend_url="https://ctc-web.deploy-box.com")
+        state = base64.urlsafe_b64encode(
+            json.dumps({"redirect_uri": redirect}).encode()
+        ).decode()
+        with patch("app.routes.auth.get_settings", return_value=settings):
+            client = _get_test_client()
+            assert client.get(
+                "/api/v1/auth/login", params={"redirect_uri": redirect},
+            ).status_code == 400
+            response = client.get(
+                "/api/v1/auth/callback", params={"code": "secret", "state": state},
+                follow_redirects=False,
+            )
+        assert response.status_code == 400
+        assert "location" not in response.headers
+
+    @pytest.mark.parametrize("redirect", [
+        "https://ctc-web.deploy-box.com/auth",
+        "cutthecrap://auth",
+        "cutthecrap:///auth",
+    ])
+    def test_accepts_app_callback_destinations(self, redirect):
+        from app.config.settings import Settings
+
+        settings = Settings(environment="production", frontend_url="https://ctc-web.deploy-box.com")
+        state = base64.urlsafe_b64encode(
+            json.dumps({"redirect_uri": redirect}).encode()
+        ).decode()
+        with patch("app.routes.auth.get_settings", return_value=settings):
+            response = _get_test_client().get(
+                "/api/v1/auth/callback", params={"code": "abc", "state": state},
+                follow_redirects=False,
+            )
+        assert response.status_code == 302
+        assert response.headers["location"].startswith(redirect + "?code=")
+
     def test_missing_code_returns_400(self):
         client = _get_test_client()
         response = client.get("/api/v1/auth/callback", follow_redirects=False)
