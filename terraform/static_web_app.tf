@@ -1,6 +1,6 @@
 resource "azurerm_static_web_app" "this" {
   name                = var.static_web_app_name
-  resource_group_name = data.azurerm_resource_group.this.name
+  resource_group_name = var.resource_group_name
   location            = var.static_web_app_location
   sku_tier            = "Free"
   sku_size            = "Free"
@@ -11,6 +11,7 @@ resource "azurerm_static_web_app" "this" {
 }
 
 resource "azurerm_dns_cname_record" "static_web_app" {
+  count               = var.enable_custom_domains ? 1 : 0
   name                = trimsuffix(var.domain_name, ".${var.dns_zone_name}")
   zone_name           = var.dns_zone_name
   resource_group_name = var.dns_zone_resource_group_name
@@ -19,6 +20,7 @@ resource "azurerm_dns_cname_record" "static_web_app" {
 }
 
 resource "azurerm_static_web_app_custom_domain" "this" {
+  count             = var.enable_custom_domains ? 1 : 0
   static_web_app_id = azurerm_static_web_app.this.id
   domain_name       = var.domain_name
   validation_type   = "cname-delegation"

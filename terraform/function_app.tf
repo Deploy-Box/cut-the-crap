@@ -1,12 +1,12 @@
 resource "azurerm_user_assigned_identity" "function" {
-  name                = "id-cutthecrap-api-prod"
-  resource_group_name = data.azurerm_resource_group.this.name
+  name                = "id-cutthecrap-api-${var.environment}"
+  resource_group_name = var.resource_group_name
   location            = var.location
 }
 
 resource "azurerm_storage_account" "function" {
-  name                            = "ctcfunctprod"
-  resource_group_name             = data.azurerm_resource_group.this.name
+  name                            = "ctcfunct${var.environment}"
+  resource_group_name             = var.resource_group_name
   location                        = var.location
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
@@ -22,16 +22,16 @@ resource "azurerm_storage_container" "function_package" {
 }
 
 resource "azurerm_log_analytics_workspace" "function" {
-  name                = "log-cutthecrap-api-prod"
-  resource_group_name = data.azurerm_resource_group.this.name
+  name                = "log-cutthecrap-api-${var.environment}"
+  resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "PerGB2018"
-  retention_in_days   = 30
+  retention_in_days   = var.log_retention_days
 }
 
 resource "azurerm_application_insights" "function" {
-  name                         = "appi-cutthecrap-api-prod"
-  resource_group_name          = data.azurerm_resource_group.this.name
+  name                         = "appi-cutthecrap-api-${var.environment}"
+  resource_group_name          = var.resource_group_name
   location                     = var.location
   application_type             = "web"
   workspace_id                 = azurerm_log_analytics_workspace.function.id
@@ -39,8 +39,8 @@ resource "azurerm_application_insights" "function" {
 }
 
 resource "azurerm_service_plan" "function" {
-  name                = "asp-cutthecrap-api-prod"
-  resource_group_name = data.azurerm_resource_group.this.name
+  name                = "asp-cutthecrap-api-${var.environment}"
+  resource_group_name = var.resource_group_name
   location            = var.location
   os_type             = "Linux"
   sku_name            = "FC1"
@@ -69,28 +69,32 @@ resource "azurerm_role_assignment" "function_monitoring" {
 }
 
 locals {
-  function_secret_names = {
-    POSTGRES_CONNECTION_STRING = "ctc-postgres-connection-string"
-    WORKOS_API_KEY             = "ctc-workos-api-key"
-    WORKOS_CLIENT_ID           = "ctc-workos-client-id"
-    DEPLOY_BOX_CLIENT_ID       = "ctc-deploy-box-client-id"
-    DEPLOY_BOX_CLIENT_SECRET   = "ctc-deploy-box-client-secret"
-    CHATGPT_API_BASE           = "ctc-chatgpt-api-base"
-    STRIPE_SECRET_KEY          = "ctc-prod-stripe-secret-key"
-    STRIPE_WEBHOOK_SECRET      = "ctc-prod-stripe-webhook-secret"
-    STRIPE_PRICE_PRO_MONTHLY   = "ctc-prod-stripe-price-pro-monthly"
-    STRIPE_PRICE_PRO_YEARLY    = "ctc-prod-stripe-price-pro-yearly"
-  }
+  function_secret_names = merge(
+    {
+      POSTGRES_CONNECTION_STRING = "ctc-postgres-connection-string"
+      WORKOS_API_KEY             = "ctc-workos-api-key"
+      WORKOS_CLIENT_ID           = "ctc-workos-client-id"
+      DEPLOY_BOX_CLIENT_ID       = "ctc-deploy-box-client-id"
+      DEPLOY_BOX_CLIENT_SECRET   = "ctc-deploy-box-client-secret"
+      CHATGPT_API_BASE           = "ctc-chatgpt-api-base"
+    },
+    var.function_enable_stripe ? {
+      STRIPE_SECRET_KEY        = "ctc-prod-stripe-secret-key"
+      STRIPE_WEBHOOK_SECRET    = "ctc-prod-stripe-webhook-secret"
+      STRIPE_PRICE_PRO_MONTHLY = "ctc-prod-stripe-price-pro-monthly"
+      STRIPE_PRICE_PRO_YEARLY  = "ctc-prod-stripe-price-pro-yearly"
+    } : {}
+  )
   function_settings = merge(
     {
-      ENVIRONMENT                               = "production"
+      ENVIRONMENT                               = var.application_environment
       FUNCTIONS_PREVIEW_MODE                    = "false"
       PLATFORM_MANAGED_CORS                     = "true"
       POSTGRES_POOL_MIN_SIZE                    = "1"
       POSTGRES_POOL_MAX_SIZE                    = "5"
-      FRONTEND_URL                              = "https://${var.domain_name}"
-      CORS_ORIGIN                               = "https://${var.domain_name},https://cutthecrap.deploy-box.com"
-      WORKOS_REDIRECT_URI                       = "https://cutthecrap.deploy-box.com/api/v1/auth/callback"
+      FRONTEND_URL                              = "https://${local.frontend_hostname}"
+      CORS_ORIGIN                               = "https://${local.frontend_hostname},https://${local.api_hostname}"
+      WORKOS_REDIRECT_URI                       = "https://${local.api_hostname}/api/v1/auth/callback"
       AzureWebJobsStorage__accountName          = azurerm_storage_account.function.name
       AzureWebJobsStorage__credential           = "managedidentity"
       AzureWebJobsStorage__clientId             = azurerm_user_assigned_identity.function.client_id
@@ -103,8 +107,8 @@ locals {
 
 resource "azapi_resource" "function" {
   type                      = "Microsoft.Web/sites@2024-11-01"
-  name                      = "func-cutthecrap-api-prod"
-  parent_id                 = data.azurerm_resource_group.this.id
+  name                      = local.function_app_name
+  parent_id                 = local.resource_group_id
   location                  = var.location
   schema_validation_enabled = false
   ignore_casing             = true
@@ -138,7 +142,7 @@ resource "azapi_resource" "function" {
           version = "3.12"
         }
         scaleAndConcurrency = {
-          maximumInstanceCount = 40
+          maximumInstanceCount = var.function_max_instance_count
           instanceMemoryMB     = 2048
         }
       }
@@ -146,7 +150,7 @@ resource "azapi_resource" "function" {
         minTlsVersion = "1.2"
         appSettings   = [for name, value in local.function_settings : { name = name, value = value }]
         cors = {
-          allowedOrigins     = ["https://${var.domain_name}", "https://cutthecrap.deploy-box.com"]
+          allowedOrigins     = ["https://${local.frontend_hostname}", "https://${local.api_hostname}"]
           supportCredentials = true
         }
       }
@@ -167,7 +171,8 @@ data "azapi_resource" "function_domain" {
 }
 
 resource "azurerm_dns_txt_record" "function_domain_verification" {
-  name                = "asuid.cutthecrap"
+  count               = var.enable_custom_domains ? 1 : 0
+  name                = "asuid.${trimsuffix(var.api_domain_name, ".${var.dns_zone_name}")}"
   zone_name           = var.dns_zone_name
   resource_group_name = var.dns_zone_resource_group_name
   ttl                 = 300
@@ -178,9 +183,10 @@ resource "azurerm_dns_txt_record" "function_domain_verification" {
 }
 
 resource "azurerm_app_service_custom_hostname_binding" "function" {
-  hostname            = "cutthecrap.deploy-box.com"
+  count               = var.enable_custom_domains ? 1 : 0
+  hostname            = var.api_domain_name
   app_service_name    = azapi_resource.function.name
-  resource_group_name = data.azurerm_resource_group.this.name
+  resource_group_name = var.resource_group_name
 
   lifecycle {
     ignore_changes = [ssl_state, thumbprint]
@@ -190,14 +196,15 @@ resource "azurerm_app_service_custom_hostname_binding" "function" {
 }
 
 resource "azapi_resource" "function_certificate" {
+  count     = var.enable_custom_domains ? 1 : 0
   type      = "Microsoft.Web/sites/certificates@2024-11-01"
-  name      = "cutthecrap.deploy-box.com"
+  name      = var.api_domain_name
   parent_id = azapi_resource.function.id
   location  = var.location
 
   body = {
     properties = {
-      canonicalName = azurerm_app_service_custom_hostname_binding.function.hostname
+      canonicalName = azurerm_app_service_custom_hostname_binding.function[0].hostname
       serverFarmId  = azurerm_service_plan.function.id
     }
   }
@@ -207,13 +214,14 @@ resource "azapi_resource" "function_certificate" {
 }
 
 resource "azapi_update_resource" "function_certificate_binding" {
+  count       = var.enable_custom_domains ? 1 : 0
   type        = "Microsoft.Web/sites/hostNameBindings@2024-11-01"
-  resource_id = azurerm_app_service_custom_hostname_binding.function.id
+  resource_id = azurerm_app_service_custom_hostname_binding.function[0].id
 
   body = {
     properties = {
       sslState   = "SniEnabled"
-      thumbprint = azapi_resource.function_certificate.output.properties.thumbprint
+      thumbprint = azapi_resource.function_certificate[0].output.properties.thumbprint
     }
   }
 }

@@ -2,7 +2,7 @@ name: CD
 
 on:
   push:
-    branches: ['dev', 'test', 'main']
+    branches: ['test', 'main']
 
 permissions:
   id-token: write
@@ -12,7 +12,7 @@ env:
   KEY_VAULT: "kv-kalebwbishop-apps"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Required GitHub configuration (per environment: dev / test / main)
+# Required GitHub configuration (per environment: test / main)
 #
 # Variables (vars.*):
 #   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
@@ -23,8 +23,10 @@ env:
 #
 # Infrastructure (VM, networking, DNS) is managed by kalebwbishop-apps-core.
 #
+# The dev environment is deployed by web-deploy.yml to its Azure resource group.
+# The legacy VM remains available for rollback but is no longer updated on dev pushes.
+#
 # Environment mapping:
-#   dev  → ctc-dev.deploy-box.com          (compose: cutthecrap-dev)
 #   test → ctc-test.deploy-box.com         (compose: cutthecrap-test)
 #   main → cutthecrap.deploy-box.com       (compose: cutthecrap)
 # ─────────────────────────────────────────────────────────────────────────────

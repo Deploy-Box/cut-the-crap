@@ -2,7 +2,7 @@ name: Deploy website and Functions API
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     paths:
       - 'web/**'
       - 'backend/**'
@@ -15,12 +15,12 @@ permissions:
   id-token: write
 
 concurrency:
-  group: cut-the-crap-web-deploy
+  group: cut-the-crap-web-deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   backend-quality:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref_name == 'main' || github.ref_name == 'dev'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,9 +38,9 @@ jobs:
       - run: python -m pytest
 
   quality:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref_name == 'main' || github.ref_name == 'dev'
     runs-on: ubuntu-latest
-    environment: main
+    environment: ${{ github.ref_name }}
     defaults:
       run:
         working-directory: web
@@ -58,7 +58,7 @@ jobs:
       - name: Verify static build
         env:
           STATIC_EXPORT: "true"
-          NEXT_PUBLIC_API_BASE: https://cutthecrap.deploy-box.com
+          NEXT_PUBLIC_API_BASE: ${{ github.ref_name == 'main' && 'https://cutthecrap.deploy-box.com' || 'https://func-cutthecrap-api-dev.azurewebsites.net' }}
           NEXT_PUBLIC_STRIPE_PRICE_MONTHLY: price_BUILDVALIDATION
           NEXT_PUBLIC_STRIPE_PRICE_YEARLY: price_BUILDVALIDATION
         run: npm run build
@@ -67,7 +67,7 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
         run: |
           if [ "$AZURE_SUBSCRIPTION_ID" != "3d5d1ab2-b17f-4c99-9bf1-db4fe0ad882e" ]; then
-            echo "AZURE_SUBSCRIPTION_ID must match the target production subscription." >&2
+            echo "AZURE_SUBSCRIPTION_ID must match the approved application subscription." >&2
             exit 1
           fi
 
@@ -78,13 +78,17 @@ jobs:
       terraform_dir: ./terraform
       terraform_version: "1.16.x"
       use_plan_file: true
-      environment: main
+      environment: ${{ github.ref_name }}
+      terraform_outputs: '["api_url","key_vault_name","static_web_app_url"]'
     secrets: inherit
 
   deploy-api:
     needs: infrastructure
     runs-on: ubuntu-latest
-    environment: main
+    environment: ${{ github.ref_name }}
+    env:
+      API_URL: ${{ fromJSON(needs.infrastructure.outputs.tf_outputs).api_url }}
+      KEY_VAULT_NAME: ${{ fromJSON(needs.infrastructure.outputs.tf_outputs).key_vault_name }}
     steps:
       - uses: actions/checkout@v4
       - name: Log in to Azure
@@ -93,25 +97,90 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Set deployment target
+        id: target
+        run: |
+          case "${{ github.ref_name }}" in
+            main)
+              echo "function_app_name=func-cutthecrap-api-prod" >> "$GITHUB_OUTPUT"
+              echo "resource_group_name=rg-cutthecrap-prod" >> "$GITHUB_OUTPUT"
+              ;;
+            dev)
+              echo "function_app_name=func-cutthecrap-api-dev" >> "$GITHUB_OUTPUT"
+              echo "resource_group_name=rg-cutthecrap-dev" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported deployment branch: ${{ github.ref_name }}" >&2
+              exit 1
+              ;;
+          esac
+      - name: Seed dev-only Key Vault secrets
+        if: github.ref_name == 'dev'
+        run: |
+          set -euo pipefail
+          sleep 60
+          source_vault="kv-kalebwbishop-apps"
+          target_vault="$KEY_VAULT_NAME"
+          read_secret() {
+            az keyvault secret show \
+              --vault-name "$source_vault" \
+              --name "$1" \
+              --query value \
+              --output tsv
+          }
+
+          postgres_host="$(read_secret ctc-postgres-host)"
+          postgres_user="$(read_secret ctc-postgres-user)"
+          postgres_password="$(read_secret ctc-postgres-password)"
+          if [[ -z "$postgres_host" || -z "$postgres_user" || -z "$postgres_password" ]]; then
+            echo "Missing required dev PostgreSQL configuration in $source_vault." >&2
+            exit 1
+          fi
+          echo "::add-mask::$postgres_host"
+          echo "::add-mask::$postgres_user"
+          echo "::add-mask::$postgres_password"
+          postgres_connection_string="$(
+            PG_HOST="$postgres_host" PG_USER="$postgres_user" PG_PASSWORD="$postgres_password" \
+              python -c 'import os; from urllib.parse import quote; print("postgresql://{}:{}@{}:5432/cutthecrap_dev?sslmode=require".format(quote(os.environ["PG_USER"], safe=""), quote(os.environ["PG_PASSWORD"], safe=""), os.environ["PG_HOST"]))'
+          )"
+          echo "::add-mask::$postgres_connection_string"
+          az keyvault secret set \
+            --vault-name "$target_vault" \
+            --name ctc-postgres-connection-string \
+            --value "$postgres_connection_string" \
+            --output none
+
+          for secret in ctc-workos-api-key ctc-workos-client-id \
+            ctc-deploy-box-client-id ctc-deploy-box-client-secret ctc-chatgpt-api-base; do
+            value="$(read_secret "$secret")"
+            if [[ -z "$value" ]]; then
+              echo "Missing required dev secret $secret in $source_vault." >&2
+              exit 1
+            fi
+            echo "::add-mask::$value"
+            az keyvault secret set \
+              --vault-name "$target_vault" \
+              --name "$secret" \
+              --value "$value" \
+              --output none
+          done
       - name: Deploy Function App
         uses: Azure/functions-action@v1
         with:
-          app-name: func-cutthecrap-api-prod
+          app-name: ${{ steps.target.outputs.function_app_name }}
           package: backend
           respect-funcignore: true
           remote-build: true
       - name: Verify API readiness and authentication
         run: |
-          host="$(az functionapp show --resource-group rg-cutthecrap-prod \
-            --name func-cutthecrap-api-prod --query properties.defaultHostName -o tsv)"
-          if [ -z "$host" ]; then
-            echo "Function App did not return a hostname." >&2
+          if [ -z "$API_URL" ]; then
+            echo "Terraform did not return the API URL." >&2
             exit 1
           fi
           for attempt in $(seq 1 36); do
-            if curl --silent --show-error --fail --max-time 20 "https://$host/api/health" > /dev/null; then
+            if curl --silent --show-error --fail --max-time 20 "$API_URL/api/health" > /dev/null; then
               status="$(curl --silent --show-error --max-time 20 --output /dev/null \
-                --write-out '%{http_code}' "https://$host/api/v1/recipes")"
+                --write-out '%{http_code}' "$API_URL/api/v1/recipes")"
               if [ "$status" = "401" ]; then
                 echo "Function App is healthy and protected routes require authentication."
                 exit 0
@@ -128,7 +197,7 @@ jobs:
   build:
     needs: infrastructure
     runs-on: ubuntu-latest
-    environment: main
+    environment: ${{ github.ref_name }}
     defaults:
       run:
         working-directory: web
@@ -141,12 +210,14 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - name: Log in to Azure
+        if: github.ref_name == 'main'
         uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: Load public Stripe price IDs
+        if: github.ref_name == 'main'
         env:
           APP_KEY_VAULT: ${{ vars.CTC_APP_KEY_VAULT_READY == 'true' && 'kv-cutthecrap-prod' || 'kv-kalebwbishop-apps' }}
         run: |
@@ -162,7 +233,7 @@ jobs:
       - name: Build static website
         env:
           STATIC_EXPORT: "true"
-          NEXT_PUBLIC_API_BASE: https://cutthecrap.deploy-box.com
+          NEXT_PUBLIC_API_BASE: ${{ fromJSON(needs.infrastructure.outputs.tf_outputs).api_url }}
         run: npm run build
       - uses: actions/upload-artifact@v4
         with:
@@ -172,14 +243,31 @@ jobs:
           retention-days: 1
 
   deploy:
-    needs: build
+    needs: [build, deploy-api]
     runs-on: ubuntu-latest
-    environment: main
+    environment: ${{ github.ref_name }}
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: static-website
           path: web/out
+      - name: Set deployment target
+        id: target
+        run: |
+          case "${{ github.ref_name }}" in
+            main)
+              echo "static_web_app_name=swa-cutthecrap-web-prod" >> "$GITHUB_OUTPUT"
+              echo "resource_group_name=rg-cutthecrap-prod" >> "$GITHUB_OUTPUT"
+              ;;
+            dev)
+              echo "static_web_app_name=swa-cutthecrap-web-dev" >> "$GITHUB_OUTPUT"
+              echo "resource_group_name=rg-cutthecrap-dev" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported deployment branch: ${{ github.ref_name }}" >&2
+              exit 1
+              ;;
+          esac
       - name: Log in to Azure
         uses: azure/login@v2
         with:
@@ -190,8 +278,8 @@ jobs:
         id: token
         run: |
           token="$(az staticwebapp secrets list \
-            --name swa-cutthecrap-web-prod \
-            --resource-group rg-cutthecrap-prod \
+            --name "${{ steps.target.outputs.static_web_app_name }}" \
+            --resource-group "${{ steps.target.outputs.resource_group_name }}" \
             --query properties.apiKey --output tsv)"
           if [ -z "$token" ]; then
             echo "Azure Static Web Apps returned an empty deployment token." >&2

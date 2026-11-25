@@ -1,6 +1,174 @@
-# Azure deployment plan
+# Azure Deployment Plan
 
-Status: Validated
+> **Status:** Validated
+>
+> The user reports adding the dev OIDC federation and GitHub Actions variables on 2026-11-25 and authorized pushing `dev`. The current GitHub CLI identity still receives HTTP 403 when inspecting environment settings; the workflow will validate authentication and state access before Terraform planning/apply.
+
+Generated: 2026-11-24
+
+## 1. Project Overview
+
+**Goal:** Prepare a separate Azure development deployment from the current `main` code, in `rg-cutthecrap-dev`, without changing production resources or data.
+
+**Path:** Add components to an existing application.
+
+The local `dev` branch already points to the same commit as `origin/main` (`f38b729`). `origin/dev` is 13 commits behind. The user asked not to push yet because doing so currently triggers the legacy shared-VM dev deployment. No push is included in this plan until the Azure dev workflow is ready and the user approves that cutover.
+
+## 2. Requirements
+
+| Attribute | Value |
+|-----------|-------|
+| Classification | Development |
+| Scale | Small |
+| Budget | Cost-optimized; usage-based charges remain possible |
+| Subscription | `deploy-box-sub-prod` (`3d5d1ab2-b17f-4c99-9bf1-db4fe0ad882e`), confirmed |
+| Location | East US 2 (`eastus2`), confirmed |
+| Compliance | No additional requirements |
+| Data | Reuse the existing dev-only `cutthecrap_dev` database and dev credentials; do not use production data or secrets |
+
+Subscription policy check found only the built-in Microsoft Defender for Cloud assignment. The target resource group does not exist yet, so it has no resource-group policy assignments.
+
+## 3. Components Detected
+
+| Component | Type | Technology | Path |
+|-----------|------|------------|------|
+| Website | Frontend | Next.js static export, Node 22 | `web/` |
+| API | Backend | FastAPI, Python 3.12 on Azure Functions | `backend/` |
+| Infrastructure | IaC | AzureRM Terraform | `terraform/` |
+| Deployment | CI/CD | GitHub Actions + OIDC | `.github/workflows/` |
+| Database | Relational | Existing Azure PostgreSQL; dev database only | External shared service |
+
+## 4. Recipe Selection
+
+**Selected:** Terraform with the repository's existing GitHub Actions deployment pipeline.
+
+**Rationale:** Existing Azure resources are managed with Terraform and the production pipeline uses a pinned reusable Terraform workflow. Dev must use a distinct state key; it must never plan against the production state.
+
+## 5. Architecture
+
+**Stack:** Static Web Apps + Azure Functions Flex Consumption.
+
+| Component | Azure Service | Proposed configuration |
+|-----------|---------------|------------------------|
+| Resource group | `Microsoft.Resources/resourceGroups` | `rg-cutthecrap-dev`, East US 2 |
+| Website | Static Web Apps | Free tier, `swa-cutthecrap-web-dev` |
+| API | Functions Flex Consumption | FC1, `func-cutthecrap-api-dev`, max 2 instances at 2,048 MB |
+| Function storage | Storage account | Standard LRS, private package container, managed-identity auth |
+| API identity | User-assigned managed identity | Dev-only resource and Key Vault access |
+| Secrets | Key Vault | Standard; dev-only secrets, no production or shared `core-*` secrets |
+| Monitoring | Application Insights + Log Analytics | Workspace-based; 30-day minimum retention |
+| Database | Existing PostgreSQL server | Existing `cutthecrap_dev` database only; no server or firewall changes |
+
+The website will use `https://ctc-dev.deploy-box.com`. The API will use `https://ctc-dev-api.deploy-box.com`; the existing `ctc-dev` A record currently points to `4.227.206.218`, and no `ctc-dev-api` DNS record exists. After the dev deployment is healthy, cut over only these dev hostnames, update the dev WorkOS callback to the API hostname, and verify CORS/authentication. Keep the existing VM and shared infrastructure available for rollback; do not delete them.
+
+Use the existing Terraform state storage account/container with a separate key `cut-the-crap/terraform-dev.tfstate`. Reuse of that storage account does not authorize edits to production state.
+
+The current dev workflow deploys to the shared VM and is triggered by pushes to `dev`. Before any push, prepare the Azure dev workflow and ensure the old dev job cannot race or overwrite the Azure cutover. No production workflow, DNS, database, or resources are in scope.
+
+## 6. Provisioning Limit Checklist
+
+| Resource Type | Number to Deploy | Total After Deployment | Limit/Quota | Notes |
+|---------------|-----------------|------------------------|-------------|-------|
+| `Microsoft.Resources/resourceGroups` | 1 | 1 new dev group | No dedicated regional quota reported | `rg-cutthecrap-dev` does not exist |
+| Static Web Apps (Free) | 1 | 4 subscription apps | 10 apps | Azure lists 3 existing; Microsoft Learn Free-tier limit |
+| Functions Flex Consumption | 1 app, max 2 x 2,048 MB | 42 max instances / 86,016 MB | 250 cores / 512,000 MB per subscription/region | One existing East US 2 app is capped at 40 x 2,048 MB; new cap adds 2 cores. [Microsoft Learn](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan) |
+| `Microsoft.Storage/storageAccounts` | 1 | 4 in East US 2 | 250 | `az quota`: 3 used, 247 available |
+| Key Vault Standard | 1 | 7 subscription vaults | No resource-count quota returned by `az quota`; service limits are transaction-based | `az quota list` returned no Key Vault regional quotas |
+| Log Analytics workspace | 1 | 11 subscription workspaces | No fixed count cap for the proposed PerGB2018 tier | Azure Monitor docs: legacy Free tier is capped at 10; other tiers have no workspace-count cap |
+| Application Insights | 1 | 1 new dev component | No applicable regional count quota returned | Workspace-based; usage charges depend on ingestion |
+
+**Capacity result:** Within documented limits. The Flex cap is 42 cores total versus the 250-core regional default. Storage quota has 247 accounts available. Azure lists 3 Static Web Apps, leaving room under the Free-tier 10-app limit. Microsoft.Quota returned no Key Vault or Log Analytics regional quota entries; documented service limits were checked instead. Provisioning can still be denied by live platform capacity or policy.
+
+## 7. Validation Proof and Execution Checklist
+
+### Phase 1: Planning
+- [x] Analyze workspace, Terraform configuration, deployment workflows, and current Azure context.
+- [x] Confirm Development / Small / Cost-optimized requirements, subscription, and region.
+- [x] Scan application and infrastructure components.
+- [x] Check subscription policy assignments and provisioning capacity.
+- [x] Select Terraform and plan isolated dev resources/state.
+- [x] User approved this plan on 2026-11-24.
+
+### Phase 2: Execution (only after approval)
+- [x] Prepare dev-specific Terraform configuration and a separate state key.
+- [ ] Prepare a dev GitHub Actions environment with least-privilege OIDC; do not reuse the existing broad production identity.
+- [ ] Prepare dev-only secret references and verify the `cutthecrap_dev` database connection without exposing secret values.
+- [ ] Prepare dev web/API hostnames, WorkOS callback, and CORS configuration.
+- [x] Prepare a safe transition from the legacy dev workflow; preserve the legacy VM for rollback.
+- [x] Run local Terraform, application, and workflow checks; no remote push or production apply.
+- [x] Update plan to `Ready for Validation`, then invoke `azure-validate`.
+- [ ] Deploy only after validation and user approval, using the approved dev deployment path.
+- [ ] Verify dev health, auth, extraction, hostname routing, and rollback path.
+
+### All validation checks pass
+- [x] Terraform and Azure CLI are installed.
+- [x] Azure authentication and target subscription are confirmed.
+- [x] Terraform initializes against the isolated dev backend.
+- [x] Terraform formatting check passes.
+- [x] Terraform configuration validation passes.
+- [x] Terraform plan uses only `tfvars/dev.tfvars` and the dev state key.
+- [x] Terraform state access is verified; the pre-deployment state contains no managed resources.
+- [x] No unresolved Go-style template variables are present.
+- [x] No applicable `main.tfvars.json` file exists.
+- [x] Website lint, type-check, tests, and static build pass.
+- [x] Node.js build/runtime requirements are supported by the selected Azure service.
+
+### Role Assignment Verification
+- Status: Verified by static review
+- Identities checked: Function user-assigned managed identity; Terraform deployment identity
+- Roles confirmed: Storage Blob Data Owner and Storage Queue/Table Data Contributor scoped to the dedicated Function storage account; Key Vault Secrets User scoped to the dev vault; Monitoring Metrics Publisher scoped to the dev Application Insights component; Key Vault Secrets Officer scoped to the dev vault for deployment-time secret seeding
+- Issues: GitHub environment settings remain unreadable to the current CLI identity (HTTP 403). The user reports adding OIDC and action variables; the first deployment run will verify them.
+
+### Validation Proof
+- Terraform 1.12.2 initialized against `terraform/config/backend-dev.conf`; `fmt -check -recursive`, `validate`, `state list`, and the plan using `tfvars/dev.tfvars` passed. Plan: 16 to add, 0 to change, 0 to destroy.
+- Node 22.16.0 website lint, type-check, tests (2 passed), and `STATIC_EXPORT=true npm run build` passed; generated output contains `https://func-cutthecrap-api-dev.azurewebsites.net`.
+- Azure CLI authentication/subscription and target-name checks passed; the dev state blob was readable and empty.
+- Static RBAC review confirmed the Function identity's storage, Key Vault, and monitoring roles and the deployment identity's dev-vault secret-seeding role.
+- The supplied PowerShell preflight script has an `$Args` parameter collision and passed no Terraform subcommands; equivalent commands passed when invoked directly with explicit argument arrays.
+
+## 8. Validation Proof
+
+The user approved 30-day retention on 2026-11-24 after the provider rejected the proposed 7-day setting. A first speculative plan read the existing production state and proposed 12 destroys; nothing was applied. All subsequent dev validation used a distinct Terraform data directory and the `cut-the-crap/terraform-dev.tfstate` key.
+
+| Check | Command / source | Result |
+|-------|-----------------|--------|
+| Azure subscription and policy | `az account show`; `az policy assignment list` | Subscription enabled; built-in Defender assignment only |
+| Web plan quota | `azure-quotas` script, `Microsoft.Web`, East US 2 | Y1 limit 30 / usage 0; Flex FC1 not listed in this quota response |
+| Storage quota | `azure-quotas` script, `Microsoft.Storage`, East US 2 | Limit 250 / usage 3 / available 247 |
+| Flex capacity | Azure Function configuration + Microsoft Learn | Existing cap 40 x 2,048 MB; proposed cap adds 2 x 2,048 MB; total 42 / 250 cores |
+| Existing resources | Azure CLI resource listings | 3 Static Web Apps, 6 Function Apps, 12 Storage Accounts, 6 Key Vaults, 10 Log Analytics workspaces |
+| Target names | Azure resource group and DNS reads | `rg-cutthecrap-dev` absent; `ctc-dev` A record exists; `ctc-dev-api` absent |
+| Application Insights name | `az resource list --resource-type Microsoft.Insights/components` | `appi-cutthecrap-api-dev` is available |
+| Dev backend | `terraform init` and `terraform state list`, using `config/backend-dev.conf` | Backend initialized and state access succeeded; no managed resources in dev state |
+| Terraform checks | Terraform 1.12.2, AzureRM 5.15.0, AzAPI 2.14.0 | Format and validate passed; dev plan: 16 additions, 0 changes, 0 destroys |
+| Website quality/build | Node 22.16.0; `npm run lint`, `npm run typecheck`, `npm test`, `STATIC_EXPORT=true npm run build` in `web/` | All passed; 2 tests passed; static output contains the dev API URL and has no Node server runtime |
+| Deployment identity | GitHub `dev` environment inspection | Not verified: current GitHub account returned HTTP 403; no push or deployment attempted |
+
+The supplied Terraform preflight script was attempted but its helper declares a parameter named `$Args`, which resolves to PowerShell's automatic argument variable and causes Terraform to receive no subcommand. Equivalent Terraform commands were run directly with explicit argument arrays and all applicable checks passed. No Azure resources were created and no DNS records changed.
+
+**Deployment readiness:** GitHub OIDC federation and permissions for the dev environment remain unverified. Do not push `dev` or deploy until those permissions are confirmed and the user approves the cutover.
+
+## 9. Files to Generate
+
+| File | Purpose |
+|------|---------|
+| `terraform/` dev configuration and backend config | Isolated dev resource group and state |
+| `.github/workflows/` | Dev deployment path; avoid legacy workflow race |
+| `backend/` and `web/` configuration as needed | Dev API origin, CORS, and hostname settings |
+| `.azure/deployment-plan.md` | Current plan and later validation/deployment evidence |
+
+## 10. Next Steps
+
+> Current: Validation passed; no Azure resources or DNS records have been changed. The user authorized pushing `dev` on 2026-11-25; GitHub Actions will verify the reported OIDC setup.
+
+1. Push the prepared changes to `dev` and monitor the GitHub Actions deployment.
+2. Keep custom-domain cutover disabled until the API and website are deployed and verified.
+
+---
+
+## Historical production plan record
+
+The following sections preserve the previously validated production plan and deployment history. They are context only and are not approval to modify production.
 
 ## Legacy cutover planning
 

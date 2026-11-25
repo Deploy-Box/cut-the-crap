@@ -1,0 +1,17 @@
+subscription_id              = "3d5d1ab2-b17f-4c99-9bf1-db4fe0ad882e"
+environment                  = "dev"
+resource_group_name          = "rg-cutthecrap-dev"
+create_resource_group        = true
+location                     = "eastus2"
+static_web_app_name          = "swa-cutthecrap-web-dev"
+static_web_app_location      = "eastus2"
+key_vault_name               = "kv-cutthecrap-dev"
+domain_name                  = "ctc-dev.deploy-box.com"
+api_domain_name              = "ctc-dev-api.deploy-box.com"
+enable_custom_domains        = false
+application_environment      = "staging"
+function_max_instance_count  = 2
+function_enable_stripe       = false
+log_retention_days           = 30
+dns_zone_name                = "deploy-box.com"
+dns_zone_resource_group_name = "deploy-box-rg-prod"
