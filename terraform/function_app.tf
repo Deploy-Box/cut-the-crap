@@ -101,7 +101,10 @@ locals {
       APPLICATIONINSIGHTS_CONNECTION_STRING     = azurerm_application_insights.function.connection_string
       APPLICATIONINSIGHTS_AUTHENTICATION_STRING = "ClientId=${azurerm_user_assigned_identity.function.client_id};Authorization=AAD"
     },
-    { for key, name in local.function_secret_names : key => "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.app.vault_uri}secrets/${name}/)" }
+    { for key, name in local.function_secret_names : key => "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.app.vault_uri}secrets/${name}/)" },
+    var.additional_website_domain != "" && local.frontend_custom_domain_enabled ? {
+      ADDITIONAL_FRONTEND_URLS = "https://${var.domain_name}"
+    } : {}
   )
 }
 

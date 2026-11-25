@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     # Frontend
     frontend_url: str = "http://localhost:8081"
+    additional_frontend_urls: str = ""
 
     # WorkOS
     workos_api_key: str = ""

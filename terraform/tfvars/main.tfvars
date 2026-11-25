@@ -7,6 +7,7 @@ static_web_app_name          = "swa-cutthecrap-web-prod"
 static_web_app_location      = "eastus2"
 key_vault_name               = "kv-cutthecrap-prod"
 domain_name                  = "ctc-web.deploy-box.com"
+additional_website_domain    = "ctc.deploy-box.com"
 api_domain_name              = "cutthecrap.deploy-box.com"
 enable_custom_domains        = true
 application_environment      = "production"

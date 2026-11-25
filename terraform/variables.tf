@@ -54,6 +54,17 @@ variable "domain_name" {
   }
 }
 
+variable "additional_website_domain" {
+  description = "Additional primary website domain, with DNS managed in the existing zone"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.additional_website_domain == "" || (endswith(var.additional_website_domain, ".${var.dns_zone_name}") && var.additional_website_domain != var.domain_name)
+    error_message = "additional_website_domain must be a different subdomain of dns_zone_name."
+  }
+}
+
 variable "api_domain_name" {
   description = "Subdomain to bind to the Function App"
   type        = string
