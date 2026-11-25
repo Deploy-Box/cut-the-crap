@@ -2,7 +2,7 @@
 
 > **Status:** Validated
 >
-> The first GitHub deployment used the production-named OIDC identity and failed at Terraform apply for lack of Azure RBAC. A dedicated dev OIDC app now has the approved dev-RG, state-container, and secret-scoped roles. Update the GitHub `dev` environment's `AZURE_CLIENT_ID` to `ab8b8da9-7819-4916-a56e-f5488a97c09e`; the current GitHub CLI identity cannot inspect or edit environment settings (HTTP 403).
+> The dedicated dev OIDC app has the approved dev-RG, state-container, and secret-scoped roles. GitHub run 45694323214 successfully deployed the dev resources, API, and website. The current GitHub CLI identity cannot inspect environment settings (HTTP 403).
 
 Generated: 2026-11-24
 
@@ -94,12 +94,12 @@ The current dev workflow deploys to the shared VM and is triggered by pushes to 
 - [x] Prepare dev-specific Terraform configuration and a separate state key.
 - [ ] Update the GitHub `dev` environment to use the dedicated dev OIDC app.
 - [x] Grant least-privilege roles to the dedicated identity on the dev resource group, state container, and required source secrets.
-- [ ] Prepare dev-only secret references and verify the `cutthecrap_dev` database connection without exposing secret values.
+- [x] Prepare dev-only secret references and verify the `cutthecrap_dev` database connection without exposing secret values.
 - [ ] Prepare dev web/API hostnames, WorkOS callback, and CORS configuration.
 - [x] Prepare a safe transition from the legacy dev workflow; preserve the legacy VM for rollback.
 - [x] Run local Terraform, application, and workflow checks; no remote push or production apply.
 - [x] Update plan to `Ready for Validation`, then invoke `azure-validate`.
-- [ ] Deploy only after validation and user approval, using the approved dev deployment path.
+- [x] Deploy after validation and user approval, using the approved dev deployment path.
 - [ ] Verify dev health, auth, extraction, hostname routing, and rollback path.
 
 ### All validation checks pass
@@ -120,7 +120,7 @@ The current dev workflow deploys to the shared VM and is triggered by pushes to 
 - Identities checked: Function user-assigned managed identity; dedicated dev OIDC app `cut-the-crap-github-dev-oidc`
 - Roles confirmed: Contributor and Role Based Access Control Administrator on `rg-cutthecrap-dev`; Storage Blob Data Contributor on only `ctctfdevstate/tfstate`; Key Vault Secrets User on only the eight required source-secret scopes. Existing Function identity role assignments were also statically reviewed.
 - Production permission comparison: Dev equivalents are already assigned; production-only DNS, vault, state, Stripe/TLS, legacy-VM, and subscription-scope reader grants were not copied.
-- Issues: GitHub `dev` must use the dedicated app ID listed above; environment variables are not readable to the current GitHub CLI identity. Temporary CLI-user state grants were removed and their removal verified.
+- Issues: GitHub environment variables are not readable to the current GitHub CLI identity, although the dev deployment subsequently succeeded. Temporary CLI-user state grants were removed and their removal verified.
 
 ### Validation Proof
 - Previous backend validation used the old state account and the then-current `create_resource_group=true` configuration. It is superseded by the new backend and existing-resource-group configuration; rerun validation before retrying deployment.
@@ -150,13 +150,15 @@ The user approved 30-day retention on 2026-11-24 after the provider rejected the
 | Website quality/build | Node 22.16.0; `npm run lint`, `npm run typecheck`, `npm test`, `STATIC_EXPORT=true npm run build` in `web/` | All passed; 2 tests passed; static output contains the dev API URL and has no Node server runtime |
 | Deployment identity | GitHub Actions run 45640301595; Azure role assignment query | First run used the production-named identity and failed for missing Azure RBAC. Dedicated dev app/federation now has 11 approved assignments; GitHub `AZURE_CLIENT_ID` still needs verification/update |
 
-The supplied Terraform preflight script was attempted but its helper declares a parameter named `$Args`, which resolves to PowerShell's automatic argument variable and causes Terraform to receive no subcommand. Equivalent Terraform commands were run directly with explicit argument arrays and all applicable checks passed for the previous configuration. No application resources or DNS records have been created or changed.
+The supplied Terraform preflight script was attempted but its helper declares a parameter named `$Args`, which resolves to PowerShell's automatic argument variable and causes Terraform to receive no subcommand. A session-only correction and explicit dev arguments were used for the successful preflight. Dev application resources have since been created; DNS has not been changed.
 
 **Deployment attempt (2026-11-25):** GitHub Actions run 45640301595 passed backend and frontend quality checks, Azure OIDC login, Terraform initialization, and planning. Apply failed with `AuthorizationFailed`; the production-named identity only had `Cut The Crap Web Location Status Reader`. No application resources or DNS records were created. The user subsequently created `rg-cutthecrap-dev` in East US and requested a dedicated state account. Azure CLI created `ctctfdevstate` and its private container in East US 2. The old state account remains untouched.
 
-**Second deployment attempt (2026-11-25):** GitHub Actions run 45677226329 used commit `356e201`, which still configures the production state account for dev. OIDC login succeeded, but Terraform initialization received `AuthorizationPermissionMismatch`; planning and apply did not run. The dedicated dev backend and existing-resource-group changes remain local and unpushed.
+**Second deployment attempt (2026-11-25):** GitHub Actions run 45677226329 used commit `356e201`, which still configured the production state account for dev. OIDC login succeeded, but Terraform initialization received `AuthorizationPermissionMismatch`; planning and apply did not run. The dedicated dev backend and existing-resource-group changes were subsequently pushed.
 
-**Deployment readiness:** Local remote-backend validation passed. GitHub `dev` `AZURE_CLIENT_ID` remains unreadable to the current CLI identity and must point to the dedicated dev app; live OIDC data-plane access remains to be verified in the deployment workflow.
+**Deployment outcome (2026-11-25):** Run 45694323214 passed all jobs. The dev database credentials are sourced from `cutthecrap-dev-pg-user` and `cutthecrap-dev-pg-password`; the deployment refreshes Key Vault references and restarts the Function App after seeding. The Function App reports a connected database, protected recipes return HTTP 401 without authentication, and a browser test successfully extracted a recipe. The website is available at `https://red-field-0241f270f.8.azurestaticapps.net` and the API at `https://func-cutthecrap-api-dev.azurewebsites.net`. Login initiation returned an authorization URL; a full sign-in and the custom-domain cutover have not been verified. No legacy resources or DNS records were removed or changed.
+
+**Deployment readiness:** The dedicated dev backend and role assignments were verified in the successful workflow. Custom-domain cutover and full authentication verification remain pending.
 
 ## 9. Files to Generate
 
@@ -169,10 +171,10 @@ The supplied Terraform preflight script was attempted but its helper declares a 
 
 ## 10. Next Steps
 
-> Current: The dedicated state account and user-created resource group exist; dev identity RBAC is configured and the remote dev plan passed. GitHub's configured client ID cannot be inspected by the current CLI identity.
+> Current: The dev website and API are deployed and healthy on their Azure hostnames; custom domains and full authentication verification remain pending.
 
-1. Update GitHub `dev` `AZURE_CLIENT_ID` to the dedicated dev app.
-2. Verify the dedicated identity through the deployment workflow and deploy; keep custom-domain cutover disabled until the API and website are deployed and verified.
+1. Verify a complete WorkOS sign-in and the intended callback configuration.
+2. Plan and verify custom-domain cutover before changing DNS; keep the legacy deployment available until then.
 
 ---
 
