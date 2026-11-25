@@ -70,6 +70,12 @@ variable "enable_custom_domains" {
   default     = true
 }
 
+variable "enable_website_custom_domain" {
+  description = "Whether to bind the website custom domain when its DNS record is managed separately"
+  type        = bool
+  default     = false
+}
+
 variable "application_environment" {
   description = "Environment label exposed to the API"
   type        = string

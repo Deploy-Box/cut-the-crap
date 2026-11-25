@@ -93,7 +93,7 @@ locals {
       POSTGRES_POOL_MIN_SIZE                    = "1"
       POSTGRES_POOL_MAX_SIZE                    = "5"
       FRONTEND_URL                              = "https://${local.frontend_hostname}"
-      CORS_ORIGIN                               = "https://${local.frontend_hostname},https://${local.api_hostname}"
+      CORS_ORIGIN                               = join(",", local.cors_origins)
       WORKOS_REDIRECT_URI                       = "https://${local.api_hostname}/api/v1/auth/callback"
       AzureWebJobsStorage__accountName          = azurerm_storage_account.function.name
       AzureWebJobsStorage__credential           = "managedidentity"
@@ -150,7 +150,7 @@ resource "azapi_resource" "function" {
         minTlsVersion = "1.2"
         appSettings   = [for name, value in local.function_settings : { name = name, value = value }]
         cors = {
-          allowedOrigins     = ["https://${local.frontend_hostname}", "https://${local.api_hostname}"]
+          allowedOrigins     = local.cors_origins
           supportCredentials = true
         }
       }

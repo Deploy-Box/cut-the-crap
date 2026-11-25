@@ -70,8 +70,13 @@ data "azurerm_resource_group" "this" {
 }
 
 locals {
-  resource_group_id = var.create_resource_group ? azurerm_resource_group.this[0].id : data.azurerm_resource_group.this[0].id
-  function_app_name = "func-cutthecrap-api-${var.environment}"
-  frontend_hostname = var.enable_custom_domains ? var.domain_name : azurerm_static_web_app.this.default_host_name
-  api_hostname      = var.enable_custom_domains ? var.api_domain_name : "${local.function_app_name}.azurewebsites.net"
+  resource_group_id              = var.create_resource_group ? azurerm_resource_group.this[0].id : data.azurerm_resource_group.this[0].id
+  function_app_name              = "func-cutthecrap-api-${var.environment}"
+  frontend_custom_domain_enabled = var.enable_custom_domains || var.enable_website_custom_domain
+  frontend_hostname              = local.frontend_custom_domain_enabled ? var.domain_name : azurerm_static_web_app.this.default_host_name
+  api_hostname                   = var.enable_custom_domains ? var.api_domain_name : "${local.function_app_name}.azurewebsites.net"
+  cors_origins = distinct(concat([
+    "https://${local.frontend_hostname}",
+    "https://${local.api_hostname}",
+  ], var.enable_custom_domains ? [] : ["https://${azurerm_static_web_app.this.default_host_name}"]))
 }

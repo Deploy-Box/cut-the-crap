@@ -6,6 +6,16 @@
 
 Generated: 2026-11-24
 
+## Current change: dev website custom domain
+
+- Goal: Serve the existing dev Static Web App at `https://dev.ctc.deploy-box.com`.
+- Scope: Add only `dev.ctc` in the existing `deploy-box.com` Azure DNS zone, bind it to `swa-cutthecrap-web-dev`, and allow both website hostnames in the dev API's CORS settings. Keep the API hostname, production records, and legacy infrastructure unchanged.
+- Existing state: `dev.ctc.deploy-box.com` currently resolves through the zone's wildcard A record to `172.212.33.64`; the explicit CNAME will override only this hostname. No exact `dev.ctc` record or dev Static Web App custom domain exists.
+- Ownership: Create the DNS record separately in Azure DNS to avoid granting the dev CI identity write access to the shared production DNS zone. Terraform manages the website binding and API origin settings; the API custom domain remains disabled.
+- Target: Existing subscription `deploy-box-sub-prod`, resource group `rg-cutthecrap-dev` (East US), and East US 2 workload.
+- Validation and deployment: Validate Terraform and the live plan, add the explicit CNAME, deploy the website binding, then verify HTTPS, API access, and recipe extraction. Preserve the existing Azure website hostname as a fallback.
+- Validation proof (2026-11-25 15:47 EST): Terraform init, formatting, validation, dev plan, and state listing passed against the dedicated dev backend using the corrected session-only preflight. The plan adds the website binding and updates the dev Function App. It also proposes replacing the dev-vault secret-writer role solely because local validation used a different identity; the existing role belongs to the dev CI principal and should remain unchanged in CI. The temporary state-account grant was removed and verified.
+
 ## 1. Project Overview
 
 **Goal:** Prepare a separate Azure development deployment from the current `main` code, in `rg-cutthecrap-dev`, without changing production resources or data.
@@ -123,6 +133,7 @@ The current dev workflow deploys to the shared VM and is triggered by pushes to 
 - Issues: GitHub environment variables are not readable to the current GitHub CLI identity, although the dev deployment subsequently succeeded. Temporary CLI-user state grants were removed and their removal verified.
 
 ### Validation Proof
+- Website custom-domain validation, 2026-11-25 15:47 EST: `terraform init` with `backend-dev.conf`, `fmt -check -recursive`, `validate`, `plan -var-file=tfvars/dev.tfvars`, and `state list` passed. The local plan adds the website domain and updates the dev Function App; it also proposes replacing the secret-writer role because the local user differs from the CI identity. Live role queries confirm the existing role belongs to the dev CI principal.
 - Previous backend validation used the old state account and the then-current `create_resource_group=true` configuration. It is superseded by the new backend and existing-resource-group configuration; rerun validation before retrying deployment.
 - Terraform 1.12.2 `fmt -check -recursive` and `validate` passed using an isolated local data directory with backend initialization disabled.
 - On 2026-11-25 at approximately 14:40 EST, Terraform remote init, format, validation, state list, and plan passed against `ctctfdevstate/tfstate` and `tfvars/dev.tfvars`. The state was empty; the plan proposed 15 additions, zero changes, and zero destroys. The recipe preflight passed using a session-only correction for its PowerShell `$Args` collision and explicit dev backend and tfvars.

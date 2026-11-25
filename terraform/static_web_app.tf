@@ -20,7 +20,7 @@ resource "azurerm_dns_cname_record" "static_web_app" {
 }
 
 resource "azurerm_static_web_app_custom_domain" "this" {
-  count             = var.enable_custom_domains ? 1 : 0
+  count             = local.frontend_custom_domain_enabled ? 1 : 0
   static_web_app_id = azurerm_static_web_app.this.id
   domain_name       = var.domain_name
   validation_type   = "cname-delegation"
