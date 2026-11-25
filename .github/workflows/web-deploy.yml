@@ -130,8 +130,8 @@ jobs:
           }
 
           postgres_host="$(read_secret ctc-postgres-host)"
-          postgres_user="$(read_secret ctc-postgres-user)"
-          postgres_password="$(read_secret ctc-postgres-password)"
+          postgres_user="$(read_secret cutthecrap-dev-pg-user)"
+          postgres_password="$(read_secret cutthecrap-dev-pg-password)"
           if [[ -z "$postgres_host" || -z "$postgres_user" || -z "$postgres_password" ]]; then
             echo "Missing required dev PostgreSQL configuration in $source_vault." >&2
             exit 1
