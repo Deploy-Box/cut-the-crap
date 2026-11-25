@@ -71,7 +71,7 @@ variable "enable_custom_domains" {
 }
 
 variable "enable_website_custom_domain" {
-  description = "Whether to bind the website custom domain when its DNS record is managed separately"
+  description = "Bind the website domain using externally managed DNS without enabling the API domain"
   type        = bool
   default     = false
 }

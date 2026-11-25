@@ -15,6 +15,7 @@ Generated: 2026-11-24
 - Target: Existing subscription `deploy-box-sub-prod`, resource group `rg-cutthecrap-dev` (East US), and East US 2 workload.
 - Validation and deployment: Validate Terraform and the live plan, add the explicit CNAME, deploy the website binding, then verify HTTPS, API access, and recipe extraction. Preserve the existing Azure website hostname as a fallback.
 - Validation proof (2026-11-25 15:47 EST): Terraform init, formatting, validation, dev plan, and state listing passed against the dedicated dev backend using the corrected session-only preflight. The plan adds the website binding and updates the dev Function App. It also proposes replacing the dev-vault secret-writer role solely because local validation used a different identity; the existing role belongs to the dev CI principal and should remain unchanged in CI. The temporary state-account grant was removed and verified.
+- Deployment recovery: The CNAME was created and the first CI plan proposed one addition, one update, and zero destroys. Azure created the hostname but denied operation-status polling; the dev CI principal was granted the existing read-only web-location role scoped to East US 2. The already-created hostname was imported into dev Terraform state and reached `Ready`. No production DNS records were changed.
 
 ## 1. Project Overview
 
