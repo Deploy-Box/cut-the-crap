@@ -1,7 +1,7 @@
 subscription_id              = "3d5d1ab2-b17f-4c99-9bf1-db4fe0ad882e"
 environment                  = "dev"
 resource_group_name          = "rg-cutthecrap-dev"
-create_resource_group        = true
+create_resource_group        = false
 location                     = "eastus2"
 static_web_app_name          = "swa-cutthecrap-web-dev"
 static_web_app_location      = "eastus2"
