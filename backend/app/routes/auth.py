@@ -29,7 +29,8 @@ def _is_allowed_redirect(uri: str, settings) -> bool:
     except ValueError:
         return False
 
-    if uri == settings.frontend_url.rstrip("/") + "/auth":
+    frontend_urls = [settings.frontend_url, *settings.additional_frontend_urls.split(",")]
+    if any(uri == url.strip().rstrip("/") + "/auth" for url in frontend_urls if url.strip()):
         return True
     if parsed.scheme == "cutthecrap":
         return port is None and (

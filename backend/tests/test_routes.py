@@ -240,6 +240,42 @@ class TestAuthCallback:
         assert response.status_code == 302
         assert response.headers["location"].startswith(redirect + "?code=")
 
+    @pytest.mark.parametrize("redirect,expected_status", [
+        ("https://ctc.deploy-box.com/auth", 302),
+        ("https://ctc-web.deploy-box.com/auth", 302),
+        ("https://ctc-web.deploy-box.com.evil.example/auth", 400),
+        ("https://ctc-web.deploy-box.com/auth?code=attacker", 400),
+    ])
+    def test_additional_frontend_callback_destinations(self, redirect, expected_status, mock_workos):
+        from app.config.settings import Settings
+
+        settings = Settings(
+            environment="production",
+            frontend_url="https://ctc.deploy-box.com",
+            additional_frontend_urls="https://ctc-web.deploy-box.com",
+        )
+        state = base64.urlsafe_b64encode(
+            json.dumps({"redirect_uri": redirect}).encode()
+        ).decode()
+        with (
+            patch("app.routes.auth.get_settings", return_value=settings),
+            patch("app.routes.auth.get_workos_client", return_value=mock_workos),
+        ):
+            client = _get_test_client()
+            login_response = client.get(
+                "/api/v1/auth/login", params={"redirect_uri": redirect},
+            )
+            response = client.get(
+                "/api/v1/auth/callback", params={"code": "abc", "state": state},
+                follow_redirects=False,
+            )
+        assert login_response.status_code == (200 if expected_status == 302 else 400)
+        assert response.status_code == expected_status
+        if expected_status == 302:
+            assert response.headers["location"] == redirect + "?code=abc"
+        else:
+            assert "location" not in response.headers
+
     def test_missing_code_returns_400(self):
         client = _get_test_client()
         response = client.get("/api/v1/auth/callback", follow_redirects=False)

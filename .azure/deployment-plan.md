@@ -1,6 +1,199 @@
-# Azure deployment plan
+# Azure Deployment Plan
 
-Status: Validated
+> **Status:** Validated
+>
+> The dedicated dev OIDC app has the approved dev-RG, state-container, and secret-scoped roles. GitHub run 45694323214 successfully deployed the dev resources, API, and website. The current GitHub CLI identity cannot inspect environment settings (HTTP 403).
+
+Generated: 2026-11-24
+
+## Current change: dev website custom domain
+
+- Goal: Serve the existing dev Static Web App at `https://dev.ctc.deploy-box.com`.
+- Scope: Add only `dev.ctc` in the existing `deploy-box.com` Azure DNS zone, bind it to `swa-cutthecrap-web-dev`, and allow both website hostnames in the dev API's CORS settings. Keep the API hostname, production records, and legacy infrastructure unchanged.
+- Existing state: `dev.ctc.deploy-box.com` currently resolves through the zone's wildcard A record to `172.212.33.64`; the explicit CNAME will override only this hostname. No exact `dev.ctc` record or dev Static Web App custom domain exists.
+- Ownership: Create the DNS record separately in Azure DNS to avoid granting the dev CI identity write access to the shared production DNS zone. Terraform manages the website binding and API origin settings; the API custom domain remains disabled.
+- Target: Existing subscription `deploy-box-sub-prod`, resource group `rg-cutthecrap-dev` (East US), and East US 2 workload.
+- Validation and deployment: Validate Terraform and the live plan, add the explicit CNAME, deploy the website binding, then verify HTTPS, API access, and recipe extraction. Preserve the existing Azure website hostname as a fallback.
+- Validation proof (2026-11-25 15:47 EST): Terraform init, formatting, validation, dev plan, and state listing passed against the dedicated dev backend using the corrected session-only preflight. The plan adds the website binding and updates the dev Function App. It also proposes replacing the dev-vault secret-writer role solely because local validation used a different identity; the existing role belongs to the dev CI principal and should remain unchanged in CI. The temporary state-account grant was removed and verified.
+- Deployment recovery: The CNAME was created and the first CI plan proposed one addition, one update, and zero destroys. Azure created the hostname but denied operation-status polling; the dev CI principal was granted the existing read-only web-location role scoped to East US 2. The already-created hostname was imported into dev Terraform state and reached `Ready`. No production DNS records were changed.
+- Outcome: GitHub run 45700198827 passed all jobs. `https://dev.ctc.deploy-box.com` returned HTTP 200 in a browser, the app connected to the API, and a recipe extraction succeeded. CORS preflights also passed for both the custom hostname and the Azure fallback hostname. Resolvers caching the previous wildcard A record can take up to its 3,600-second TTL to refresh.
+
+## 1. Project Overview
+
+**Goal:** Prepare a separate Azure development deployment from the current `main` code, in `rg-cutthecrap-dev`, without changing production resources or data.
+
+**Path:** Add components to an existing application.
+
+The local `dev` branch already points to the same commit as `origin/main` (`f38b729`). `origin/dev` is 13 commits behind. The user asked not to push yet because doing so currently triggers the legacy shared-VM dev deployment. No push is included in this plan until the Azure dev workflow is ready and the user approves that cutover.
+
+## 2. Requirements
+
+| Attribute | Value |
+|-----------|-------|
+| Classification | Development |
+| Scale | Small |
+| Budget | Cost-optimized; usage-based charges remain possible |
+| Subscription | `deploy-box-sub-prod` (`3d5d1ab2-b17f-4c99-9bf1-db4fe0ad882e`), confirmed |
+| Location | East US 2 (`eastus2`), confirmed |
+| Compliance | No additional requirements |
+| Data | Reuse the existing dev-only `cutthecrap_dev` database and dev credentials; do not use production data or secrets |
+
+Subscription policy check found only the built-in Microsoft Defender for Cloud assignment. No policy assignments are scoped directly to the user-created `rg-cutthecrap-dev` resource group.
+
+## 3. Components Detected
+
+| Component | Type | Technology | Path |
+|-----------|------|------------|------|
+| Website | Frontend | Next.js static export, Node 22 | `web/` |
+| API | Backend | FastAPI, Python 3.12 on Azure Functions | `backend/` |
+| Infrastructure | IaC | AzureRM Terraform | `terraform/` |
+| Deployment | CI/CD | GitHub Actions + OIDC | `.github/workflows/` |
+| Database | Relational | Existing Azure PostgreSQL; dev database only | External shared service |
+
+## 4. Recipe Selection
+
+**Selected:** Terraform with the repository's existing GitHub Actions deployment pipeline.
+
+**Rationale:** Existing Azure resources are managed with Terraform and the production pipeline uses a pinned reusable Terraform workflow. Dev must use a distinct state key; it must never plan against the production state.
+
+## 5. Architecture
+
+**Stack:** Static Web Apps + Azure Functions Flex Consumption.
+
+| Component | Azure Service | Proposed configuration |
+|-----------|---------------|------------------------|
+| Resource group | `Microsoft.Resources/resourceGroups` | Existing user-created `rg-cutthecrap-dev` (East US); Terraform reads it as a data source |
+| Website | Static Web Apps | Free tier, `swa-cutthecrap-web-dev` |
+| API | Functions Flex Consumption | FC1, `func-cutthecrap-api-dev`, max 2 instances at 2,048 MB |
+| Function storage | Storage account | Standard LRS, private package container, managed-identity auth |
+| Terraform state | Storage account + blob container | `ctctfdevstate` / `tfstate`, East US 2, Standard LRS, private, HTTPS/TLS 1.2, shared-key auth disabled, versioning and 30-day soft delete |
+| API identity | User-assigned managed identity | Dev-only resource and Key Vault access |
+| Secrets | Key Vault | Standard; dev-only secrets, no production or shared `core-*` secrets |
+| Monitoring | Application Insights + Log Analytics | Workspace-based; 30-day minimum retention |
+| Database | Existing PostgreSQL server | Existing `cutthecrap_dev` database only; no server or firewall changes |
+
+The website will use `https://ctc-dev.deploy-box.com`. The API will use `https://ctc-dev-api.deploy-box.com`; the existing `ctc-dev` A record currently points to `4.227.206.218`, and no `ctc-dev-api` DNS record exists. After the dev deployment is healthy, cut over only these dev hostnames, update the dev WorkOS callback to the API hostname, and verify CORS/authentication. Keep the existing VM and shared infrastructure available for rollback; do not delete them.
+
+The user-created resource group is in East US; workload resources remain in East US 2. Terraform reads the existing group instead of attempting to create or replace it. A dedicated state account, `ctctfdevstate`, and private `tfstate` container were created by Azure CLI in that group on 2026-11-25. Dev state uses the isolated key `cut-the-crap/terraform-dev.tfstate`; the old production state account is no longer used by dev.
+
+The current dev workflow deploys to the shared VM and is triggered by pushes to `dev`. Before any push, prepare the Azure dev workflow and ensure the old dev job cannot race or overwrite the Azure cutover. No production workflow, DNS, database, or resources are in scope.
+
+## 6. Provisioning Limit Checklist
+
+| Resource Type | Number to Deploy | Total After Deployment | Limit/Quota | Notes |
+|---------------|-----------------|------------------------|-------------|-------|
+| `Microsoft.Resources/resourceGroups` | 0 | 1 existing dev group | No dedicated regional quota reported | Created by the user in East US; Terraform reads it as existing |
+| Static Web Apps (Free) | 1 | 4 subscription apps | 10 apps | Azure lists 3 existing; Microsoft Learn Free-tier limit |
+| Functions Flex Consumption | 1 app, max 2 x 2,048 MB | 42 max instances / 86,016 MB | 250 cores / 512,000 MB per subscription/region | One existing East US 2 app is capped at 40 x 2,048 MB; new cap adds 2 cores. [Microsoft Learn](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan) |
+| `Microsoft.Storage/storageAccounts` | 1 Function account | 5 in East US 2 | 250 | 3 pre-existing plus `ctctfdevstate`; 246 remain before and 245 after the Function account is created |
+| Key Vault Standard | 1 | 7 subscription vaults | No resource-count quota returned by `az quota`; service limits are transaction-based | `az quota list` returned no Key Vault regional quotas |
+| Log Analytics workspace | 1 | 11 subscription workspaces | No fixed count cap for the proposed PerGB2018 tier | Azure Monitor docs: legacy Free tier is capped at 10; other tiers have no workspace-count cap |
+| Application Insights | 1 | 1 new dev component | No applicable regional count quota returned | Workspace-based; usage charges depend on ingestion |
+
+**Capacity result:** Within documented limits. The Flex cap is 42 cores total versus the 250-core regional default. Storage quota has 247 accounts available. Azure lists 3 Static Web Apps, leaving room under the Free-tier 10-app limit. Microsoft.Quota returned no Key Vault or Log Analytics regional quota entries; documented service limits were checked instead. Provisioning can still be denied by live platform capacity or policy.
+
+## 7. Validation Proof and Execution Checklist
+
+### Phase 1: Planning
+- [x] Analyze workspace, Terraform configuration, deployment workflows, and current Azure context.
+- [x] Confirm Development / Small / Cost-optimized requirements, subscription, and region.
+- [x] Scan application and infrastructure components.
+- [x] Check subscription policy assignments and provisioning capacity.
+- [x] Select Terraform and plan isolated dev resources/state.
+- [x] User approved this plan on 2026-11-24.
+
+### Phase 2: Execution (only after approval)
+- [x] Prepare dev-specific Terraform configuration and a separate state key.
+- [ ] Update the GitHub `dev` environment to use the dedicated dev OIDC app.
+- [x] Grant least-privilege roles to the dedicated identity on the dev resource group, state container, and required source secrets.
+- [x] Prepare dev-only secret references and verify the `cutthecrap_dev` database connection without exposing secret values.
+- [ ] Prepare dev web/API hostnames, WorkOS callback, and CORS configuration.
+- [x] Prepare a safe transition from the legacy dev workflow; preserve the legacy VM for rollback.
+- [x] Run local Terraform, application, and workflow checks; no remote push or production apply.
+- [x] Update plan to `Ready for Validation`, then invoke `azure-validate`.
+- [x] Deploy after validation and user approval, using the approved dev deployment path.
+- [ ] Verify dev health, auth, extraction, hostname routing, and rollback path.
+
+### All validation checks pass
+- [x] Terraform and Azure CLI are installed.
+- [x] Azure authentication and target subscription are confirmed.
+- [x] Terraform initializes against the new dedicated dev backend.
+- [x] Terraform formatting check passes after the backend/resource-group updates.
+- [x] Terraform configuration validation passes after the backend/resource-group updates.
+- [x] Terraform plan uses only `tfvars/dev.tfvars` and the new dev state account/key.
+- [x] Terraform state access is verified; the new state container is currently empty.
+- [x] No unresolved Go-style template variables are present.
+- [x] No applicable `main.tfvars.json` file exists.
+- [x] Website lint, type-check, tests, and static build pass.
+- [x] Node.js build/runtime requirements are supported by the selected Azure service.
+
+### Role Assignment Verification
+- Status: Verified with Azure role-assignment queries for the dedicated dev identity
+- Identities checked: Function user-assigned managed identity; dedicated dev OIDC app `cut-the-crap-github-dev-oidc`
+- Roles confirmed: Contributor and Role Based Access Control Administrator on `rg-cutthecrap-dev`; Storage Blob Data Contributor on only `ctctfdevstate/tfstate`; Key Vault Secrets User on only the eight required source-secret scopes. Existing Function identity role assignments were also statically reviewed.
+- Production permission comparison: Dev equivalents are already assigned; production-only DNS, vault, state, Stripe/TLS, legacy-VM, and subscription-scope reader grants were not copied.
+- Issues: GitHub environment variables are not readable to the current GitHub CLI identity, although the dev deployment subsequently succeeded. Temporary CLI-user state grants were removed and their removal verified.
+
+### Validation Proof
+- Website custom-domain validation, 2026-11-25 15:47 EST: `terraform init` with `backend-dev.conf`, `fmt -check -recursive`, `validate`, `plan -var-file=tfvars/dev.tfvars`, and `state list` passed. The local plan adds the website domain and updates the dev Function App; it also proposes replacing the secret-writer role because the local user differs from the CI identity. Live role queries confirm the existing role belongs to the dev CI principal.
+- Previous backend validation used the old state account and the then-current `create_resource_group=true` configuration. It is superseded by the new backend and existing-resource-group configuration; rerun validation before retrying deployment.
+- Terraform 1.12.2 `fmt -check -recursive` and `validate` passed using an isolated local data directory with backend initialization disabled.
+- On 2026-11-25 at approximately 14:40 EST, Terraform remote init, format, validation, state list, and plan passed against `ctctfdevstate/tfstate` and `tfvars/dev.tfvars`. The state was empty; the plan proposed 15 additions, zero changes, and zero destroys. The recipe preflight passed using a session-only correction for its PowerShell `$Args` collision and explicit dev backend and tfvars.
+- Earlier local state access probes incorrectly reported propagation failure because Windows `az.cmd` rejected the unquoted `length(@)` query. A corrected probe succeeded using a user-approved temporary account-scoped grant, which was removed and verified.
+- Node 22.16.0 website lint, type-check, tests (2 passed), and `STATIC_EXPORT=true npm run build` passed; generated output contains `https://func-cutthecrap-api-dev.azurewebsites.net`.
+- Azure CLI authentication/subscription and target-name checks passed. The new state account/container exists, and the dedicated CI identity has its container role, but GitHub's `AZURE_CLIENT_ID` could not be verified (HTTP 403).
+- Static RBAC review confirmed the Function identity's storage, Key Vault, and monitoring roles and the deployment identity's dev-vault secret-seeding role.
+- The supplied PowerShell preflight script has an `$Args` parameter collision and passed no Terraform subcommands; equivalent commands passed when invoked directly with explicit argument arrays.
+
+## 8. Validation Proof
+
+The user approved 30-day retention on 2026-11-24 after the provider rejected the proposed 7-day setting. A first speculative plan read the existing production state and proposed 12 destroys; nothing was applied. All subsequent dev validation used a distinct Terraform data directory and the `cut-the-crap/terraform-dev.tfstate` key.
+
+| Check | Command / source | Result |
+|-------|-----------------|--------|
+| Azure subscription and policy | `az account show`; `az policy assignment list` | Subscription enabled; built-in Defender assignment only |
+| Web plan quota | `azure-quotas` script, `Microsoft.Web`, East US 2 | Y1 limit 30 / usage 0; Flex FC1 not listed in this quota response |
+| Storage quota | `azure-quotas` script plus new state account, `Microsoft.Storage`, East US 2 | Limit 250 / usage 4 / available 246; planned Function storage leaves 245 |
+| Flex capacity | Azure Function configuration + Microsoft Learn | Existing cap 40 x 2,048 MB; proposed cap adds 2 x 2,048 MB; total 42 / 250 cores |
+| Existing resources | Azure CLI resource listings | 3 Static Web Apps, 6 Function Apps, 13 Storage Accounts, 6 Key Vaults, 10 Log Analytics workspaces |
+| Target names | Azure resource group and DNS reads | `rg-cutthecrap-dev` exists in East US; `ctc-dev` A record exists; `ctc-dev-api` absent |
+| Application Insights name | `az resource list --resource-type Microsoft.Insights/components` | `appi-cutthecrap-api-dev` is available |
+| Dev backend | `terraform init -reconfigure -backend-config=config/backend-dev.conf`; `terraform state list` | Initialized with the dedicated dev backend; state contains no managed resources |
+| Terraform checks | Terraform 1.12.2, AzureRM 5.15.0, AzAPI 2.14.0; `terraform plan -var-file=tfvars/dev.tfvars` | Format and validate passed; plan: 15 additions, 0 changes, 0 destroys |
+| Website quality/build | Node 22.16.0; `npm run lint`, `npm run typecheck`, `npm test`, `STATIC_EXPORT=true npm run build` in `web/` | All passed; 2 tests passed; static output contains the dev API URL and has no Node server runtime |
+| Deployment identity | GitHub Actions run 45640301595; Azure role assignment query | First run used the production-named identity and failed for missing Azure RBAC. Dedicated dev app/federation now has 11 approved assignments; GitHub `AZURE_CLIENT_ID` still needs verification/update |
+
+The supplied Terraform preflight script was attempted but its helper declares a parameter named `$Args`, which resolves to PowerShell's automatic argument variable and causes Terraform to receive no subcommand. A session-only correction and explicit dev arguments were used for the successful preflight. Dev application resources have since been created; DNS has not been changed.
+
+**Deployment attempt (2026-11-25):** GitHub Actions run 45640301595 passed backend and frontend quality checks, Azure OIDC login, Terraform initialization, and planning. Apply failed with `AuthorizationFailed`; the production-named identity only had `Cut The Crap Web Location Status Reader`. No application resources or DNS records were created. The user subsequently created `rg-cutthecrap-dev` in East US and requested a dedicated state account. Azure CLI created `ctctfdevstate` and its private container in East US 2. The old state account remains untouched.
+
+**Second deployment attempt (2026-11-25):** GitHub Actions run 45677226329 used commit `356e201`, which still configured the production state account for dev. OIDC login succeeded, but Terraform initialization received `AuthorizationPermissionMismatch`; planning and apply did not run. The dedicated dev backend and existing-resource-group changes were subsequently pushed.
+
+**Deployment outcome (2026-11-25):** Run 45694323214 passed all jobs. The dev database credentials are sourced from `cutthecrap-dev-pg-user` and `cutthecrap-dev-pg-password`; the deployment refreshes Key Vault references and restarts the Function App after seeding. The Function App reports a connected database, protected recipes return HTTP 401 without authentication, and a browser test successfully extracted a recipe. The website is available at `https://red-field-0241f270f.8.azurestaticapps.net` and the API at `https://func-cutthecrap-api-dev.azurewebsites.net`. Login initiation returned an authorization URL; a full sign-in and the custom-domain cutover have not been verified. No legacy resources or DNS records were removed or changed.
+
+**Deployment readiness:** The dedicated dev backend and role assignments were verified in the successful workflow. Custom-domain cutover and full authentication verification remain pending.
+
+## 9. Files to Generate
+
+| File | Purpose |
+|------|---------|
+| `terraform/` dev configuration and backend config | Isolated dev resource group and state |
+| `.github/workflows/` | Dev deployment path; avoid legacy workflow race |
+| `backend/` and `web/` configuration as needed | Dev API origin, CORS, and hostname settings |
+| `.azure/deployment-plan.md` | Current plan and later validation/deployment evidence |
+
+## 10. Next Steps
+
+> Current: The dev website and API are deployed and healthy on their Azure hostnames; custom domains and full authentication verification remain pending.
+
+1. Verify a complete WorkOS sign-in and the intended callback configuration.
+2. Plan and verify custom-domain cutover before changing DNS; keep the legacy deployment available until then.
+
+---
+
+## Historical production plan record
+
+The following sections preserve the previously validated production plan and deployment history. They are context only and are not approval to modify production.
 
 ## Legacy cutover planning
 
