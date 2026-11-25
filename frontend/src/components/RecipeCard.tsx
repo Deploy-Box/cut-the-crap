@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
 import * as Linking from 'expo-linking';
-import { Recipe, RecipeStep } from '@/types/recipe';
+import { Recipe } from '@/types/recipe';
 import { useThemeColors, fontSizes, spacing, radii } from '@/theme';
 import type { ThemeColors } from '@/theme';
+import { parseDurationMatches } from '@/utils/duration';
+import { useTimerStore } from '@/store/timerStore';
+import { scheduleTimerNotification } from '@/utils/notifications';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -37,6 +40,59 @@ export default function RecipeCard({ recipe, url }: RecipeCardProps) {
   const [showStepIngredients, setShowStepIngredients] = useState(false);
   const colors = useThemeColors();
   const s = useMemo(() => createStyles(colors), [colors]);
+  const startTimer = useTimerStore((state) => state.startTimer);
+  const setNotificationId = useTimerStore((state) => state.setNotificationId);
+
+  const handleStartTimer = async (
+    durationSeconds: number,
+    durationText: string,
+    stepIndex: number
+  ) => {
+    startTimer({
+      label: `Step ${stepIndex + 1} · ${durationText}`,
+      recipeTitle: recipe.title,
+      stepIndex,
+      durationSeconds,
+    });
+    const timers = useTimerStore.getState().timers;
+    const timer = timers[timers.length - 1];
+    if (timer) {
+      const notificationId = await scheduleTimerNotification(
+        `Step ${stepIndex + 1} · ${durationText}`,
+        durationSeconds
+      );
+      setNotificationId(timer.id, notificationId);
+    }
+  };
+
+  const renderInstruction = (instruction: string, stepIndex: number) => {
+    const matches = parseDurationMatches(instruction);
+    if (matches.length === 0) return <Text style={s.stepText}>{instruction}</Text>;
+
+    const parts: React.ReactNode[] = [];
+    let cursor = 0;
+    matches.forEach((match, matchIndex) => {
+      if (match.start > cursor) {
+        parts.push(<Text key={`text-${matchIndex}`}>{instruction.slice(cursor, match.start)}</Text>);
+      }
+      parts.push(
+        <Text
+          key={`duration-${matchIndex}`}
+          style={s.durationChip}
+          onPress={() => handleStartTimer(match.seconds, match.text, stepIndex)}
+          accessibilityRole="button"
+          accessibilityLabel={`Start ${match.text} timer`}
+        >
+          {match.text}
+        </Text>
+      );
+      cursor = match.end;
+    });
+    if (cursor < instruction.length) {
+      parts.push(<Text key="text-end">{instruction.slice(cursor)}</Text>);
+    }
+    return <Text style={s.stepText}>{parts}</Text>;
+  };
 
   const hasMeta =
     recipe.prep_time ||
@@ -150,7 +206,7 @@ export default function RecipeCard({ recipe, url }: RecipeCardProps) {
                   <View style={s.stepNumber}>
                     <Text style={s.stepNumberText}>{i + 1}</Text>
                   </View>
-                  <Text style={s.stepText}>{instruction}</Text>
+                  {renderInstruction(instruction, i)}
                 </View>
                 {showStepIngredients && stepIngredients.length > 0 && (
                   <View style={s.stepIngredients}>
@@ -330,6 +386,13 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.text,
       lineHeight: 25,
       paddingTop: 3,
+    },
+    durationChip: {
+      color: colors.success,
+      fontSize: fontSizes.lg,
+      fontWeight: '700',
+      backgroundColor: colors.bgSubtle,
+      textDecorationLine: 'underline',
     },
     stepIngredients: {
       marginLeft: 42,

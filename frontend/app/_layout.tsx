@@ -13,6 +13,7 @@ import { useAuthStore } from '../src/store/authStore';
 import { useSubscriptionStore } from '../src/store/subscriptionStore';
 import { useRecipeStore } from '../src/store/recipeStore';
 import { setupAuthInterceptor } from '../src/api/authInterceptor';
+import TimersPanel from '../src/components/TimersPanel';
 
 // Prevent the splash screen from auto-hiding until we finish restoring the session.
 SplashScreen.preventAutoHideAsync();
@@ -153,6 +154,7 @@ function RootLayoutInner() {
                     animation: 'fade',
                 }}
             />
+            <TimersPanel />
         </View>
     );
 }
