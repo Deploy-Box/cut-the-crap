@@ -11,6 +11,7 @@ from app.services.recipe_service import (
     call_openai_chat,
     fetch_and_extract,
     count_saved_recipes,
+    find_saved_recipe_duplicate,
     get_saved_recipes,
     get_saved_recipe_by_id,
     create_saved_recipe,
@@ -536,6 +537,29 @@ class TestCountSavedRecipes:
         patch_get_pool.fetchrow.return_value = None
         result = await count_saved_recipes("user-1")
         assert result == 0
+
+
+class TestFindSavedRecipeDuplicate:
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("source_url, expected", [
+        ("https://example.com/pasta", "https://example.com/pasta"),
+        (None, "Pasta"),
+    ])
+    async def test_scopes_duplicate_to_user(self, patch_get_pool, source_url, expected):
+        patch_get_pool.fetchrow.return_value = make_record({
+            "id": "recipe-1", "title": "Pasta", "source_url": source_url,
+            "folder_id": None, "created_at": "2025-01-01",
+        })
+        result = await find_saved_recipe_duplicate(
+            user_id="user-1", title="Pasta", source_url=source_url,
+        )
+        assert result["id"] == "recipe-1"
+        assert patch_get_pool.fetchrow.call_args.args[1:] == ("user-1", expected)
+
+    @pytest.mark.asyncio
+    async def test_no_duplicate(self, patch_get_pool):
+        patch_get_pool.fetchrow.return_value = None
+        assert await find_saved_recipe_duplicate(user_id="user-1", title="Pasta") is None
 
 
 class TestGetSavedRecipes:

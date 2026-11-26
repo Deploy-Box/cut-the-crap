@@ -426,6 +426,97 @@ class TestChatGPTParseUrl:
         assert len(call_kwargs["text"]) == 12_000
 
 
+class TestChatGPTGenerateAndSave:
+    @patch("app.routes.chatgpt.call_openai_chat")
+    def test_generate_recipe(self, mock_call):
+        mock_call.return_value = {
+            "success": True,
+            "data": {"title": "Lemon Pasta", "ingredients": ["pasta", "lemon"]},
+        }
+        client = _get_test_client()
+        response = client.post(
+            "/api/v1/chatgpt/generate",
+            json={"text": "Create a simple lemon pasta recipe"},
+        )
+        assert response.status_code == 200
+        assert response.json()["data"]["title"] == "Lemon Pasta"
+        assert "source_url" not in response.json()
+
+    def test_save_requires_confirmation(self):
+        client = _get_test_client(override_auth=True)
+        response = client.post(
+            "/api/v1/chatgpt/save-recipe",
+            json={"title": "Cake", "ingredients": ["flour"]},
+        )
+        assert response.status_code == 422
+
+    def test_save_requires_authentication(self):
+        client = _get_test_client()
+        response = client.post(
+            "/api/v1/chatgpt/save-recipe",
+            json={"confirmed": True, "title": "Cake"},
+        )
+        assert response.status_code == 401
+
+    @patch("app.routes.chatgpt.svc.find_saved_recipe_duplicate")
+    def test_save_rejects_duplicate(self, mock_duplicate):
+        mock_duplicate.return_value = {
+            "id": "existing-1",
+            "title": "Cake",
+            "sourceUrl": None,
+        }
+        client = _get_test_client(override_auth=True)
+        response = client.post(
+            "/api/v1/chatgpt/save-recipe",
+            json={"confirmed": True, "title": "Cake", "ingredients": ["flour"]},
+        )
+        assert response.status_code == 409
+        assert response.json()["error"]["code"] == "DUPLICATE_RECIPE"
+
+    @patch("app.routes.chatgpt.svc.create_saved_recipe")
+    @patch("app.routes.chatgpt.svc.count_saved_recipes", new_callable=AsyncMock, return_value=0)
+    @patch("app.routes.chatgpt.is_entitled", new_callable=AsyncMock, return_value=True)
+    @patch("app.routes.chatgpt.svc.find_saved_recipe_duplicate")
+    def test_save_source_less_recipe(
+        self,
+        mock_duplicate,
+        _mock_entitled,
+        _mock_count,
+        mock_create,
+    ):
+        mock_duplicate.return_value = None
+        mock_create.return_value = {
+            "id": "new-1",
+            "title": "Cake",
+            "sourceUrl": None,
+        }
+        client = _get_test_client(override_auth=True)
+        response = client.post(
+            "/api/v1/chatgpt/save-recipe",
+            json={
+                "confirmed": True,
+                "title": "Cake",
+                "ingredients": ["flour", "sugar"],
+                "steps": [{"instruction": "Mix", "ingredients": ["flour", "sugar"]}],
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        assert mock_create.call_args.kwargs["source_url"] is None
+
+    def test_save_rejects_user_id_in_payload(self):
+        client = _get_test_client(override_auth=True)
+        response = client.post(
+            "/api/v1/chatgpt/save-recipe",
+            json={
+                "confirmed": True,
+                "title": "Cake",
+                "userId": "someone-else",
+            },
+        )
+        assert response.status_code == 422
+
+
 # ═════════════════════════════════════════════════════════════════════
 # Recipe routes (auth required)
 # ═════════════════════════════════════════════════════════════════════

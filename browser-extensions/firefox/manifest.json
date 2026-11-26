@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Cut The Crap",
+  "version": "1.0.0",
+  "description": "Send the current page to Cut The Crap to extract its recipe.",
+  "permissions": ["activeTab"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_title": "Get the recipe with Cut The Crap"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "cutthecrap@deploy-box.com"
+    }
+  }
+}

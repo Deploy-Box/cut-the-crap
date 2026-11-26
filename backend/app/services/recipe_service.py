@@ -421,6 +421,35 @@ async def count_saved_recipes(user_id: str) -> int:
     return int(row["cnt"]) if row else 0
 
 
+async def find_saved_recipe_duplicate(
+    *, user_id: str, title: str, source_url: str | None = None,
+) -> dict[str, Any] | None:
+    """Find a saved recipe with the same source URL, or source-less title."""
+    pool = await get_pool()
+    if source_url:
+        row = await pool.fetchrow(
+            "SELECT id, title, source_url, folder_id, created_at FROM saved_recipes "
+            "WHERE user_id = $1 AND source_url = $2 ORDER BY created_at DESC LIMIT 1",
+            user_id, source_url,
+        )
+    else:
+        row = await pool.fetchrow(
+            "SELECT id, title, source_url, folder_id, created_at FROM saved_recipes "
+            "WHERE user_id = $1 AND source_url IS NULL "
+            "AND lower(btrim(title)) = lower(btrim($2)) ORDER BY created_at DESC LIMIT 1",
+            user_id, title,
+        )
+    if not row:
+        return None
+    return {
+        "id": str(row["id"]),
+        "title": row["title"],
+        "sourceUrl": row["source_url"],
+        "folderId": str(row["folder_id"]) if row["folder_id"] else None,
+        "createdAt": str(row["created_at"]) if row["created_at"] else None,
+    }
+
+
 async def get_saved_recipes(user_id: str) -> list[dict[str, Any]]:
     """Return all saved recipes for a user, newest first."""
     pool = await get_pool()
