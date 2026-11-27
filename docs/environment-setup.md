@@ -40,11 +40,19 @@ All environments share the same Key Vault (`kv-kalebwbishop-apps`). The followin
 | `ctc-acr-password` | ACR push/pull password |
 | `ctc-workos-api-key` | WorkOS API key |
 | `ctc-workos-client-id` | WorkOS client ID |
+| `ctc-openai-api-key` | OpenAI API key for recipe extraction and meal planning |
 | `ctc-deploy-box-client-id` | Deploy Box OAuth client ID |
 | `ctc-deploy-box-client-secret` | Deploy Box OAuth client secret |
-| `ctc-chatgpt-api-base` | Azure Function proxy base URL |
+| `ctc-chatgpt-api-base` | Deploy Box email service base URL |
 | `ctc-tls-fullchain` | TLS certificate (base64-encoded) |
 | `ctc-tls-privkey` | TLS private key (base64-encoded) |
+
+For local development, set `OPENAI_API_KEY` in `backend/.env`. Feedback email
+continues to use the Deploy Box service and its client credentials. If using
+its legacy API key instead, configure it separately as `DEPLOY_BOX_API_KEY`;
+do not reuse the OpenAI API key. For Azure Functions, provision
+`ctc-openai-api-key` in each app's Key Vault; the dev deployment copies it
+from the shared source vault.
 
 The domain for each environment is computed automatically from the branch name:
 - `main` → `cutthecrap.deploy-box.com`

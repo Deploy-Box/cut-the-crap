@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { getFriendlyErrorMessage } from "@/lib/error-messages";
 
 function AuthCallback() {
   const params = useSearchParams();
@@ -22,7 +23,7 @@ function AuthCallback() {
   }, [code, ready, exchange, router]);
 
   const message = error || (!code ? "No sign-in code was provided." : "");
-  return <main className="page-shell empty-state">{message ? <><h1>Couldn’t sign you in.</h1><p role="alert">{message}</p><Link href="/">Return home</Link></> : <p role="status">Signing you in…</p>}</main>;
+  return <main className="page-shell empty-state">{message ? <><h1>Couldn’t sign you in.</h1><p role="alert">{getFriendlyErrorMessage(message)}</p><Link href="/">Return home</Link></> : <p role="status">Signing you in…</p>}</main>;
 }
 
 export default function AuthPage() {

@@ -184,7 +184,7 @@ jobs:
           secrets="core-vm-hostname core-vm-ssh-private-key \
                          ctc-tls-fullchain ctc-tls-privkey \
                          ctc-acr-login-server ctc-acr-username ctc-acr-password \
-                         ctc-domain-name ctc-workos-api-key ctc-workos-client-id \
+                         ctc-domain-name ctc-workos-api-key ctc-workos-client-id ctc-openai-api-key \
                          ctc-deploy-box-client-id ctc-deploy-box-client-secret ctc-chatgpt-api-base \
                          ctc-postgres-host ctc-postgres-user ctc-postgres-password"
           if [ "$BRANCH" = "main" ]; then
@@ -247,6 +247,7 @@ jobs:
           WORKOS_API_KEY=${{ steps.kv.outputs.WORKOS_API_KEY }}
           WORKOS_CLIENT_ID=${{ steps.kv.outputs.WORKOS_CLIENT_ID }}
           WORKOS_REDIRECT_URI=https://${FULL_DOMAIN}/api/v1/auth/callback
+          OPENAI_API_KEY=${{ steps.kv.outputs.OPENAI_API_KEY }}
           DEPLOY_BOX_CLIENT_ID=${{ steps.kv.outputs.DEPLOY_BOX_CLIENT_ID }}
           DEPLOY_BOX_CLIENT_SECRET=${{ steps.kv.outputs.DEPLOY_BOX_CLIENT_SECRET }}
           CHATGPT_API_BASE=${{ steps.kv.outputs.CHATGPT_API_BASE }}

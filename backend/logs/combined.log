@@ -3674,3 +3674,704 @@ let us know at support@stripe.com.
 
 (Network error: SSLError: HTTPSConnectionPool(host='api.stripe.com', port=443): Max retries exceeded with url: /v1/checkout/sessions (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)'))))
 {"time": "2026-04-20 16:41:13", "level": "INFO", "message": "POST /api/v1/billing/web/create-checkout-session — 500 (2729ms)"}
+{"time": "2026-11-25 18:59:05", "level": "INFO", "message": "Azure Function response: {"success": true}"}
+{"time": "2026-11-25 18:59:05", "level": "ERROR", "message": "Azure Function timed out: https://api.test/api/v1/chatgpt"}
+{"time": "2026-11-25 18:59:05", "level": "ERROR", "message": "Azure Function request error: connection refused"}
+{"time": "2026-11-25 18:59:05", "level": "ERROR", "message": "Azure Function error 429: Rate limited"}
+{"time": "2026-11-25 18:59:05", "level": "INFO", "message": "Azure Function response: {}"}
+{"time": "2026-11-25 18:59:05", "level": "INFO", "message": "Azure Function response: {"success": true}"}
+{"time": "2026-11-25 18:59:05", "level": "ERROR", "message": "Azure Function timed out: https://api.test/api/v1/chatgpt"}
+{"time": "2026-11-25 18:59:05", "level": "ERROR", "message": "Azure Function request error: connection refused"}
+{"time": "2026-11-25 18:59:05", "level": "ERROR", "message": "Azure Function error 429: Rate limited"}
+{"time": "2026-11-25 18:59:05", "level": "INFO", "message": "Azure Function response: {}"}
+{"time": "2026-11-25 18:59:06", "level": "WARNING", "message": "Could not fetch robots.txt from https://slow.example.com/robots.txt: timeout — allowing all"}
+{"time": "2026-11-25 18:59:06", "level": "WARNING", "message": "Could not fetch robots.txt from https://nonexistent.example.com/robots.txt: DNS failure — allowing all"}
+{"time": "2026-11-25 18:59:06", "level": "ERROR", "message": "HTTP fetch error for https://nonexistent.example.com: DNS failure"}
+{"time": "2026-11-25 18:59:06", "level": "WARNING", "message": "Could not fetch robots.txt from https://slow.example.com/robots.txt: timeout — allowing all"}
+{"time": "2026-11-25 18:59:06", "level": "WARNING", "message": "Could not fetch robots.txt from https://nonexistent.example.com/robots.txt: DNS failure — allowing all"}
+{"time": "2026-11-25 18:59:06", "level": "ERROR", "message": "HTTP fetch error for https://nonexistent.example.com: DNS failure"}
+{"time": "2026-11-25 19:01:27", "level": "INFO", "message": "POST /api/v1/chatgpt/generate — 200 (6ms)"}
+{"time": "2026-11-25 19:01:27", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (43ms)"}
+{"time": "2026-11-25 19:01:27", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 401 (2ms)"}
+{"time": "2026-11-25 19:01:27", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 409 (2ms)"}
+{"time": "2026-11-25 19:01:27", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 200 (5ms)"}
+{"time": "2026-11-25 19:01:27", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (3ms)"}
+{"time": "2026-11-25 19:01:50", "level": "INFO", "message": "GET /api/health — 200 (1ms)"}
+{"time": "2026-11-25 19:01:50", "level": "INFO", "message": "GET /api/health — 503 (1ms)"}
+{"time": "2026-11-25 19:01:50", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-25 19:01:56", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (0ms)"}
+{"time": "2026-11-25 19:02:03", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 405 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/status — 200 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/recipes — 401 (0ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 422 (3ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/status — 200 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/health — 200 (0ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/nonexistent — 404 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 19:02:04", "level": "WARNING", "message": "Failed to decode state parameter, using default redirect"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\auth.py", line 130, in callback
+    payload = json.loads(base64.urlsafe_b64decode(padded))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 341, in loads
+    s = s.decode(detect_encoding(s), 'surrogatepass')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x9e in position 0: invalid start byte
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (70ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "chatgpt/parse – model=gpt-4o-mini, text length=19"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (4ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "chatgpt/parse – model=custom-model, text length=4"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "chatgpt/parse – model=gpt-4o-mini, text length=4"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 422 (0ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-4o-mini"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "chatgpt/parse-url – url=https://slow.example.com, model=gpt-4o-mini"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 408 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-4o-mini"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/generate — 200 (4ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (8ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 401 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 409 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 200 (3ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/recipes — 200 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/recipes/count — 200 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/recipes/r1 — 200 (1ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "GET /api/v1/recipes/nonexistent — 404 (2ms)"}
+{"time": "2026-11-25 19:02:04", "level": "INFO", "message": "POST /api/v1/recipes — 200 (38ms)"}
+{"time": "2026-11-25 19:02:05", "level": "ERROR", "message": "Failed to query entitlement for user=00000000-0000-0000-0000-000000000001 key=pro – failing open"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\entitlement_service.py", line 28, in get_user_entitlement
+    pool = await get_pool()
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\config\database.py", line 21, in get_pool
+    _pool = await asyncpg.create_pool(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 418, in _async__init__
+    await self._initialize()
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 445, in _initialize
+    await first_ch.connect()
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 132, in connect
+    self._con = await self._pool._get_new_connection()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 517, in _get_new_connection
+    con = await self._connect(
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py", line 886, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py", line 934, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "devuser"
+{"time": "2026-11-25 19:02:05", "level": "ERROR", "message": "Failed to save recipe"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\recipes.py", line 188, in save_recipe
+    row = await svc.create_saved_recipe(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 2291, in _execute_mock_call
+    raise effect
+RuntimeError: DB insert failed
+{"time": "2026-11-25 19:02:05", "level": "INFO", "message": "POST /api/v1/recipes — 500 (584ms)"}
+{"time": "2026-11-25 19:02:05", "level": "INFO", "message": "Azure Function response: {"success": true}"}
+{"time": "2026-11-25 19:02:05", "level": "ERROR", "message": "Azure Function timed out: https://api.test/api/v1/chatgpt"}
+{"time": "2026-11-25 19:02:05", "level": "ERROR", "message": "Azure Function request error: connection refused"}
+{"time": "2026-11-25 19:02:05", "level": "ERROR", "message": "Azure Function error 429: Rate limited"}
+{"time": "2026-11-25 19:02:05", "level": "INFO", "message": "Azure Function response: {}"}
+{"time": "2026-11-25 19:02:06", "level": "WARNING", "message": "Could not fetch robots.txt from https://slow.example.com/robots.txt: timeout — allowing all"}
+{"time": "2026-11-25 19:02:06", "level": "WARNING", "message": "Could not fetch robots.txt from https://nonexistent.example.com/robots.txt: DNS failure — allowing all"}
+{"time": "2026-11-25 19:02:06", "level": "ERROR", "message": "HTTP fetch error for https://nonexistent.example.com: DNS failure"}
+{"time": "2026-11-25 23:34:29", "level": "INFO", "message": "POST /api/v1/chatgpt/generate — 200 (4ms)"}
+{"time": "2026-11-25 23:34:29", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (9ms)"}
+{"time": "2026-11-25 23:34:29", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 401 (2ms)"}
+{"time": "2026-11-25 23:34:30", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (2ms)"}
+{"time": "2026-11-25 23:35:19", "level": "INFO", "message": "GET /api/health — 200 (1ms)"}
+{"time": "2026-11-25 23:35:19", "level": "INFO", "message": "GET /api/health — 503 (1ms)"}
+{"time": "2026-11-25 23:35:19", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-25 23:35:25", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (0ms)"}
+{"time": "2026-11-25 23:35:32", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 405 (1ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/v1/status — 200 (1ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/v1/recipes — 401 (0ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 422 (3ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/health — 200 (1ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/v1/nonexistent — 404 (0ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:33", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (0ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-25 23:35:34", "level": "WARNING", "message": "Failed to decode state parameter, using default redirect"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\auth.py", line 130, in callback
+    payload = json.loads(base64.urlsafe_b64decode(padded))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 341, in loads
+    s = s.decode(detect_encoding(s), 'surrogatepass')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x9e in position 0: invalid start byte
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (63ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "chatgpt/parse – model=gpt-4o-mini, text length=19"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (3ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "chatgpt/parse – model=custom-model, text length=4"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "chatgpt/parse – model=gpt-4o-mini, text length=4"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 422 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-4o-mini"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "chatgpt/parse-url – url=https://slow.example.com, model=gpt-4o-mini"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 408 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-4o-mini"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/generate — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (7ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 401 (1ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 409 (3ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 200 (3ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/recipes — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/recipes/count — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/recipes/r1 — 200 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "GET /api/v1/recipes/nonexistent — 404 (2ms)"}
+{"time": "2026-11-25 23:35:34", "level": "INFO", "message": "POST /api/v1/recipes — 200 (6ms)"}
+{"time": "2026-11-25 23:35:35", "level": "ERROR", "message": "Failed to query entitlement for user=00000000-0000-0000-0000-000000000001 key=pro – failing open"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\entitlement_service.py", line 28, in get_user_entitlement
+    pool = await get_pool()
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\config\database.py", line 21, in get_pool
+    _pool = await asyncpg.create_pool(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 418, in _async__init__
+    await self._initialize()
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 445, in _initialize
+    await first_ch.connect()
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 132, in connect
+    self._con = await self._pool._get_new_connection()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py", line 517, in _get_new_connection
+    con = await self._connect(
+          ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py", line 886, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py", line 934, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "devuser"
+{"time": "2026-11-25 23:35:35", "level": "ERROR", "message": "Failed to save recipe"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\recipes.py", line 150, in save_recipe
+    row = await svc.create_saved_recipe(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 2291, in _execute_mock_call
+    raise effect
+RuntimeError: DB insert failed
+{"time": "2026-11-25 23:35:35", "level": "INFO", "message": "POST /api/v1/recipes — 500 (692ms)"}
+{"time": "2026-11-25 23:35:35", "level": "INFO", "message": "Azure Function response: {"success": true}"}
+{"time": "2026-11-25 23:35:35", "level": "ERROR", "message": "Azure Function timed out: https://api.test/api/v1/chatgpt"}
+{"time": "2026-11-25 23:35:35", "level": "ERROR", "message": "Azure Function request error: connection refused"}
+{"time": "2026-11-25 23:35:35", "level": "ERROR", "message": "Azure Function error 429: Rate limited"}
+{"time": "2026-11-25 23:35:35", "level": "INFO", "message": "Azure Function response: {}"}
+{"time": "2026-11-25 23:35:36", "level": "WARNING", "message": "Could not fetch robots.txt from https://slow.example.com/robots.txt: timeout — allowing all"}
+{"time": "2026-11-25 23:35:36", "level": "WARNING", "message": "Could not fetch robots.txt from https://nonexistent.example.com/robots.txt: DNS failure — allowing all"}
+{"time": "2026-11-25 23:35:36", "level": "ERROR", "message": "HTTP fetch error for https://nonexistent.example.com: DNS failure"}
+{"time": "2026-11-26 22:37:30", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 22:37:30", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 22:42:26", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 22:42:26", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 22:42:28", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 22:42:41", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (0ms)"}
+{"time": "2026-11-26 22:42:41", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-4o-mini"}
+{"time": "2026-11-26 22:42:43", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:42:43", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:42:44", "level": "ERROR", "message": "Token endpoint returned 400: {"error":"unauthorized_client","error_description":"AADSTS700016: Application with identifier 'your-base64-encoded-client-id' was not found in the directory '13948c46-2012-4ee2-9594-cd6e4cab3026'. This can happen if the application has not been installed by the administrator of the tenant or consent"}
+{"time": "2026-11-26 22:42:44", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (2847ms)"}
+{"time": "2026-11-26 22:43:49", "level": "INFO", "message": "PostgreSQL connection pool closed"}
+{"time": "2026-11-26 22:43:49", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-26 22:44:02", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 22:44:02", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 22:44:03", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 22:44:11", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-4o-mini"}
+{"time": "2026-11-26 22:44:12", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:44:12", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:44:13", "level": "INFO", "message": "Acquired new Deploy Box bearer token (expires in 3599s)"}
+{"time": "2026-11-26 22:44:25", "level": "INFO", "message": "Azure Function response: {"success": true, "data": {"is_recipe": true, "title": "Corn Pudding {traditional and gluten free recipes}", "description": "Creamed corn is mixed into a custard-like cornbread to make this American classic side dish.", "prep_time": "10 minutes", "cook_time": "50 minutes", "cool_time": null, "chill_time": null, "rest_time": null, "marinate_time": null, "soak_time": null, "total_time": "60 minutes", "servings": "12", "ingredients": ["4 eggs", "\u00bd cup sugar", "\u00bd cup sour cream", "30 ounce"}
+{"time": "2026-11-26 22:44:25", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (13566ms)"}
+{"time": "2026-11-26 22:44:32", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (1ms)"}
+{"time": "2026-11-26 22:44:32", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-4o-mini"}
+{"time": "2026-11-26 22:44:33", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:44:33", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:44:44", "level": "INFO", "message": "Azure Function response: {"success": true, "data": {"is_recipe": true, "title": "Corn Pudding", "description": "Creamed corn is blended into a custard-like cornbread, creating this classic American side dish.", "prep_time": "10 minutes", "cook_time": "50 minutes", "cool_time": null, "chill_time": null, "rest_time": null, "marinate_time": null, "soak_time": null, "total_time": "60 minutes", "servings": "12", "ingredients": ["4 eggs", "\u00bd cup sugar", "\u00bd cup sour cream", "30 ounces creamed corn (2 cans)", "4 table"}
+{"time": "2026-11-26 22:44:44", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (11358ms)"}
+{"time": "2026-11-26 22:47:15", "level": "INFO", "message": "PostgreSQL connection pool closed"}
+{"time": "2026-11-26 22:47:15", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-26 22:47:26", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 22:47:26", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 22:47:27", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 22:47:36", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 22:47:36", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 22:47:37", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 22:47:59", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-6-luna"}
+{"time": "2026-11-26 22:48:01", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:48:01", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:48:02", "level": "INFO", "message": "Acquired new Deploy Box bearer token (expires in 3599s)"}
+{"time": "2026-11-26 22:48:11", "level": "ERROR", "message": "Azure Function error 500: {"success": false, "error": "Failed to parse text with ChatGPT"}"}
+{"time": "2026-11-26 22:48:11", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (11529ms)"}
+{"time": "2026-11-26 22:48:40", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-6-luna"}
+{"time": "2026-11-26 22:48:40", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:48:40", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:48:46", "level": "ERROR", "message": "Azure Function error 500: {"success": false, "error": "Failed to parse text with ChatGPT"}"}
+{"time": "2026-11-26 22:48:46", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (6225ms)"}
+{"time": "2026-11-26 22:57:00", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (0ms)"}
+{"time": "2026-11-26 22:57:00", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-6-luna"}
+{"time": "2026-11-26 22:57:01", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:57:01", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:57:08", "level": "ERROR", "message": "Azure Function error 500: {"success": false, "error": "Failed to parse text with ChatGPT"}"}
+{"time": "2026-11-26 22:57:08", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (7493ms)"}
+{"time": "2026-11-26 22:57:43", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-6-luna"}
+{"time": "2026-11-26 22:57:44", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 22:57:44", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 22:57:50", "level": "ERROR", "message": "Azure Function error 500: {"success": false, "error": "Failed to parse text with ChatGPT"}"}
+{"time": "2026-11-26 22:57:50", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (6695ms)"}
+{"time": "2026-11-26 23:05:46", "level": "INFO", "message": "PostgreSQL connection pool closed"}
+{"time": "2026-11-26 23:05:46", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-26 23:05:58", "level": "ERROR", "message": "OPENAI_API_KEY is not configured"}
+{"time": "2026-11-26 23:05:58", "level": "ERROR", "message": "OpenAI API request timed out"}
+{"time": "2026-11-26 23:05:58", "level": "ERROR", "message": "OpenAI API request error: connection refused"}
+{"time": "2026-11-26 23:05:58", "level": "ERROR", "message": "OpenAI API returned status 429"}
+{"time": "2026-11-26 23:05:58", "level": "WARNING", "message": "OpenAI refused the request"}
+{"time": "2026-11-26 23:05:58", "level": "WARNING", "message": "OpenAI response was incomplete: length"}
+{"time": "2026-11-26 23:05:58", "level": "WARNING", "message": "OpenAI returned an invalid response"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\recipe_service.py", line 262, in call_openai_chat
+    data = json.loads(content)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+{"time": "2026-11-26 23:05:58", "level": "WARNING", "message": "OpenAI returned an invalid response"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\recipe_service.py", line 250, in call_openai_chat
+    choice = resp.json()["choices"][0]
+             ~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+{"time": "2026-11-26 23:05:58", "level": "WARNING", "message": "Could not fetch robots.txt from https://slow.example.com/robots.txt: timeout — allowing all"}
+{"time": "2026-11-26 23:05:58", "level": "WARNING", "message": "Could not fetch robots.txt from https://nonexistent.example.com/robots.txt: DNS failure — allowing all"}
+{"time": "2026-11-26 23:05:58", "level": "ERROR", "message": "HTTP fetch error for https://nonexistent.example.com: DNS failure"}
+{"time": "2026-11-26 23:05:59", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 23:05:59", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 23:06:00", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 23:06:06", "level": "INFO", "message": "GET /api/health — 200 (0ms)"}
+{"time": "2026-11-26 23:06:06", "level": "INFO", "message": "GET /api/health — 503 (1ms)"}
+{"time": "2026-11-26 23:06:06", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-26 23:06:12", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (0ms)"}
+{"time": "2026-11-26 23:06:19", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 405 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/recipes — 401 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 422 (3ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/health — 200 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/nonexistent — 404 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (3ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:06:20", "level": "WARNING", "message": "Failed to decode state parameter, using default redirect"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\auth.py", line 130, in callback
+    payload = json.loads(base64.urlsafe_b64decode(padded))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 341, in loads
+    s = s.decode(detect_encoding(s), 'surrogatepass')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x9e in position 0: invalid start byte
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (32ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "chatgpt/parse – model=gpt-6-luna, text length=19"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (5ms)"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "chatgpt/parse – model=custom-model, text length=4"}
+{"time": "2026-11-26 23:06:20", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (3ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "chatgpt/parse – model=gpt-6-luna, text length=4"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (2ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 422 (1ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-6-luna"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (2ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "chatgpt/parse-url – url=https://slow.example.com, model=gpt-6-luna"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 408 (2ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-6-luna"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (5ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/generate — 200 (3ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (11ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 401 (2ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 409 (3ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 200 (3ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (3ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "GET /api/v1/recipes — 200 (1ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "GET /api/v1/recipes/count — 200 (2ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "GET /api/v1/recipes/r1 — 200 (1ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "GET /api/v1/recipes/nonexistent — 404 (2ms)"}
+{"time": "2026-11-26 23:06:21", "level": "INFO", "message": "POST /api/v1/recipes — 200 (5ms)"}
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 23:06:22", "level": "ERROR", "message": "Failed to save recipe"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\recipes.py", line 150, in save_recipe
+    row = await svc.create_saved_recipe(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 2291, in _execute_mock_call
+    raise effect
+RuntimeError: DB insert failed
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "POST /api/v1/recipes — 500 (1441ms)"}
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "Error email sent for GET /api/test (ValueError)"}
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "Error email sent for GET /api/<evil> (ValueError)"}
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "Error email sent for GET /api/test (ValueError)"}
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "Feedback email sent successfully for u@test.com"}
+{"time": "2026-11-26 23:06:22", "level": "INFO", "message": "Feedback email sent successfully for a@b.com"}
+{"time": "2026-11-26 23:07:07", "level": "ERROR", "message": "OPENAI_API_KEY is not configured"}
+{"time": "2026-11-26 23:07:07", "level": "ERROR", "message": "OpenAI API request timed out"}
+{"time": "2026-11-26 23:07:07", "level": "ERROR", "message": "OpenAI API request error: connection refused"}
+{"time": "2026-11-26 23:07:07", "level": "ERROR", "message": "OpenAI API returned status 429"}
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "OpenAI refused the request"}
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "OpenAI response was incomplete: length"}
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "OpenAI returned an invalid response"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\recipe_service.py", line 262, in call_openai_chat
+    data = json.loads(content)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "OpenAI returned an invalid response"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\recipe_service.py", line 271, in call_openai_chat
+    raise ValueError("expected JSON object")
+ValueError: expected JSON object
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "OpenAI returned an invalid response"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\services\recipe_service.py", line 250, in call_openai_chat
+    choice = resp.json()["choices"][0]
+             ~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "Could not fetch robots.txt from https://slow.example.com/robots.txt: timeout — allowing all"}
+{"time": "2026-11-26 23:07:07", "level": "WARNING", "message": "Could not fetch robots.txt from https://nonexistent.example.com/robots.txt: DNS failure — allowing all"}
+{"time": "2026-11-26 23:07:07", "level": "ERROR", "message": "HTTP fetch error for https://nonexistent.example.com: DNS failure"}
+{"time": "2026-11-26 23:07:12", "level": "INFO", "message": "PostgreSQL connection pool closed"}
+{"time": "2026-11-26 23:07:12", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-26 23:07:17", "level": "INFO", "message": "GET /api/health — 200 (1ms)"}
+{"time": "2026-11-26 23:07:17", "level": "INFO", "message": "GET /api/health — 503 (1ms)"}
+{"time": "2026-11-26 23:07:17", "level": "INFO", "message": "GET /api/v1/status — 200 (1ms)"}
+{"time": "2026-11-26 23:07:21", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 23:07:21", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 23:07:22", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 23:07:22", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (0ms)"}
+{"time": "2026-11-26 23:07:22", "level": "INFO", "message": "chatgpt/parse-url – url=https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/, model=gpt-6-luna"}
+{"time": "2026-11-26 23:07:24", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 200 (1ms)"}
+{"time": "2026-11-26 23:07:24", "level": "INFO", "message": "Structured data extraction succeeded via json-ld"}
+{"time": "2026-11-26 23:07:24", "level": "INFO", "message": "Using structured data as ChatGPT input for https://barefeetinthekitchen.com/classic-corn-pudding-made-from-scratch-recipe/"}
+{"time": "2026-11-26 23:07:24", "level": "ERROR", "message": "OPENAI_API_KEY is not configured"}
+{"time": "2026-11-26 23:07:24", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (1448ms)"}
+{"time": "2026-11-26 23:07:31", "level": "INFO", "message": "OPTIONS /api/v1/chatgpt/parse-url — 405 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "🚀 Server starting on port 8000"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "📝 Environment: development"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/status — 200 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/recipes — 401 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 422 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Server shut down"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/status — 200 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/health — 200 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/nonexistent — 404 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 200 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (0ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/login — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 400 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (33ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=absent)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "OAuth callback received (state=present)"}
+{"time": "2026-11-26 23:07:32", "level": "WARNING", "message": "Failed to decode state parameter, using default redirect"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\auth.py", line 130, in callback
+    payload = json.loads(base64.urlsafe_b64decode(padded))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 341, in loads
+    s = s.decode(detect_encoding(s), 'surrogatepass')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x9e in position 0: invalid start byte
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "Callback redirecting to the application"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/auth/callback — 302 (3ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse – model=gpt-6-luna, text length=19"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (6ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse – model=custom-model, text length=4"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (4ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse – model=gpt-6-luna, text length=4"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 200 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse — 422 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-6-luna"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (3ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-6-luna"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (3ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse-url – url=https://slow.example.com, model=gpt-6-luna"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 408 (3ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "chatgpt/parse-url – url=https://example.com/recipe, model=gpt-6-luna"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/parse-url — 200 (4ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/generate — 200 (4ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (11ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 401 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 409 (4ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 200 (3ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/chatgpt/save-recipe — 422 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/recipes — 200 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/recipes/count — 200 (3ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/recipes/r1 — 200 (2ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "GET /api/v1/recipes/nonexistent — 404 (1ms)"}
+{"time": "2026-11-26 23:07:32", "level": "INFO", "message": "POST /api/v1/recipes — 200 (6ms)"}
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 23:07:34", "level": "ERROR", "message": "Failed to save recipe"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\routes\recipes.py", line 150, in save_recipe
+    row = await svc.create_saved_recipe(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 2291, in _execute_mock_call
+    raise effect
+RuntimeError: DB insert failed
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "POST /api/v1/recipes — 500 (1444ms)"}
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "Error email sent for GET /api/test (ValueError)"}
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "Error email sent for GET /api/<evil> (ValueError)"}
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "Error email sent for GET /api/test (ValueError)"}
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "Feedback email sent successfully for u@test.com"}
+{"time": "2026-11-26 23:07:34", "level": "INFO", "message": "Feedback email sent successfully for a@b.com"}
+{"time": "2026-11-26 23:07:53", "level": "INFO", "message": "✅ Connected to PostgreSQL database"}
+{"time": "2026-11-26 23:07:54", "level": "ERROR", "message": "Error: Resource not found | GET /api/test | status=404"}
+{"time": "2026-11-26 23:07:54", "level": "ERROR", "message": "Error: Server failure | POST /api/data | status=500"}
+{"time": "2026-11-26 23:07:54", "level": "ERROR", "message": "Unhandled error: unexpected | GET /api/explode"}
+NoneType: None
+{"time": "2026-11-26 23:07:55", "level": "ERROR", "message": "Unhandled error: secret DB password in traceback | GET /api/secret"}
+NoneType: None
+{"time": "2026-11-26 23:07:56", "level": "ERROR", "message": "Unhandled error: kaboom | POST /api/boom"}
+NoneType: None
+{"time": "2026-11-26 23:07:56", "level": "ERROR", "message": "Unhandled error: something bad | GET /api/fail"}
+NoneType: None
+{"time": "2026-11-26 23:07:56", "level": "ERROR", "message": "Failed to send error-report email"}
+Traceback (most recent call last):
+  File "C:\Users\KBishop\code\apps\cut-the-crap\backend\app\middleware\error_handler.py", line 35, in _safe_send_error_email
+    await send_error_email(exc=exc, method=method, path=path)
+  File "C:\Users\KBishop\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 2291, in _execute_mock_call
+    raise effect
+Exception: email service down
+{"time": "2026-11-26 23:09:03", "level": "INFO", "message": "PostgreSQL connection pool closed"}
+{"time": "2026-11-26 23:09:03", "level": "INFO", "message": "Server shut down"}

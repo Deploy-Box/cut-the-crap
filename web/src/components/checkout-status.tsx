@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { getFriendlyErrorMessage } from "@/lib/error-messages";
 
 export function CheckoutStatus() {
   const [message, setMessage] = useState("");
@@ -29,9 +30,9 @@ export function CheckoutStatus() {
           if (i < 4) await new Promise((resolve) => setTimeout(resolve, 1500));
         }
         cleanUrl();
-      } catch {
+      } catch (error) {
         if (!cancelled) {
-          setMessage("Checkout completed, but we couldn't check your subscription. Please try again later.");
+          setMessage(`Checkout completed, but we couldn't verify it: ${getFriendlyErrorMessage(error)}`);
           cleanUrl();
         }
       }

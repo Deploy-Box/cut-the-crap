@@ -74,6 +74,7 @@ locals {
       POSTGRES_CONNECTION_STRING = "ctc-postgres-connection-string"
       WORKOS_API_KEY             = "ctc-workos-api-key"
       WORKOS_CLIENT_ID           = "ctc-workos-client-id"
+      OPENAI_API_KEY             = "ctc-openai-api-key"
       DEPLOY_BOX_CLIENT_ID       = "ctc-deploy-box-client-id"
       DEPLOY_BOX_CLIENT_SECRET   = "ctc-deploy-box-client-secret"
       CHATGPT_API_BASE           = "ctc-chatgpt-api-base"

@@ -26,11 +26,12 @@ class Settings(BaseSettings):
     workos_client_id: str = ""
     workos_redirect_uri: str = "https://cutthecrap.deploy-box.com/api/v1/auth/callback"
 
-    # ChatGPT Azure Function
+    # OpenAI and Deploy Box email service
     chatgpt_api_base: str = "https://deploy-box-apis-func-dev.azurewebsites.net"
-    openai_api_key: str = ""  # deprecated – use client credentials below
+    openai_api_key: str = ""
     deploy_box_client_id: str = ""
     deploy_box_client_secret: str = ""
+    deploy_box_api_key: str = ""
 
     # Stripe billing
     stripe_secret_key: str = ""

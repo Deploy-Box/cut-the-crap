@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { RecipeView } from "@/components/recipe-view";
 import { api, fromSavedRecipe, parseRecipe, post, recipePayload } from "@/lib/api";
+import { getFriendlyErrorMessage } from "@/lib/error-messages";
 import type { Recipe, SavedRecipeDetail } from "@/lib/types";
 
 function ResultContent() {
@@ -74,10 +75,10 @@ function ResultContent() {
       {recipe && (user ? <button className="button button-small" disabled={saved || saving} onClick={save}>{saved ? "Saved ✓" : saving ? "Saving…" : "Save recipe"}</button> :
         <button className="text-button" onClick={() => void login().catch(() => setError("Could not start sign in."))}>Log in to save</button>)}
     </div>
-    {loading && <div className="empty-state" role="status"><p className="eyebrow">ON IT</p><h1>Finding the actual recipe…</h1><p>Skipping the life story and getting to the good part.</p></div>}
-    {error && <p className="error" role="alert">{error} {error.includes("Free accounts") && <Link href="/upgrade">Upgrade to Pro</Link>}</p>}
-    {notice && <p className="notice" role="status">{notice}</p>}
-    {!loading && notRecipe && <div className="empty-state"><h1>That doesn’t look like a recipe.</h1><p>Try a different link.</p><Link className="button" href="/">Try another URL</Link></div>}
+    {loading && <div className="empty-state" role="status"><h1>Finding the actual recipe…</h1><p>Skipping the life story and getting to the good part.</p></div>}
+    {error && <p className="error" role="alert">{getFriendlyErrorMessage(error)} {error.includes("Free accounts") && <Link href="/upgrade">Upgrade to Pro</Link>}</p>}
+    {notice && <p className="notice" role="status">{getFriendlyErrorMessage(notice)}</p>}
+    {!loading && notRecipe && <div className="empty-state"><h1>{getFriendlyErrorMessage("This page is not a recipe.")}</h1><p>Try a link with an ingredient list and cooking steps.</p><Link className="button" href="/">Try another URL</Link></div>}
     {recipe && <RecipeView recipe={recipe} sourceUrl={sourceUrl} />}
   </main>;
 }

@@ -28,6 +28,6 @@ After Terraform creates the new vault, an authorized operator must grant the dep
 
 The workflow builds against `https://cutthecrap.deploy-box.com`. The prepared backend CD change adds the new origin to production CORS only when that backend is next deployed; it does not change the live backend now. The backend's Stripe customer portal return URL remains the existing production frontend, so returning from the portal will currently land on the old site. Verify WorkOS and Stripe configuration and both websites' behavior before directing users to the new domain.
 
-Before switching traffic, verify backend CORS, the WorkOS callback and allowed web origin, Stripe price IDs and return URLs, and the proxy routing for `/api`. Test extraction, sign-in, session refresh, saved recipes, meal planning, and Stripe against a non-production environment. This app deliberately does not modify the existing deployment or Expo build.
+Before switching traffic, verify backend CORS, the WorkOS callback and allowed web origin, Stripe price IDs and return URLs, and the proxy routing for `/api`. Test extraction, sign-in, session refresh, saved recipes, and Stripe against a non-production environment. This app deliberately does not modify the existing deployment or Expo build.
 
 The existing Expo web app uses `auth_access_token` and `auth_refresh_token` in browser local storage; this website uses the same keys to retain existing sessions when served on the same origin. On a different origin, users will need to sign in again.

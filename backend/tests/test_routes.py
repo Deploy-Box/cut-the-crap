@@ -355,7 +355,8 @@ class TestChatGPTParseText:
         )
         assert response.status_code == 200
         assert response.json()["success"] is True
-        assert mock_call.call_args.kwargs["model"] == "gpt-4o-mini"
+        from app.services.recipe_service import DEFAULT_CHAT_MODEL
+        assert mock_call.call_args.kwargs["model"] == DEFAULT_CHAT_MODEL
 
     @patch("app.routes.chatgpt.call_openai_chat")
     def test_explicit_model_is_preserved(self, mock_call):
@@ -382,6 +383,33 @@ class TestChatGPTParseText:
 
 
 class TestChatGPTParseUrl:
+    @patch("app.services.recipe_service.httpx.AsyncClient")
+    @patch("app.services.recipe_service.get_settings")
+    @patch("app.routes.chatgpt.fetch_and_extract")
+    def test_parse_url_uses_openai_response(self, mock_fetch, mock_settings, mock_client_cls):
+        mock_fetch.return_value = {"ok": True, "title": "Recipe", "text": "Mix stuff"}
+        mock_settings.return_value = MagicMock(openai_api_key="sk-test")
+        mock_response = MagicMock(status_code=200)
+        mock_response.json.return_value = {
+            "choices": [{
+                "finish_reason": "stop",
+                "message": {"content": '{"is_recipe":true,"title":"Mac &amp; Cheese"}'},
+            }],
+        }
+        client = AsyncMock()
+        client.post.return_value = mock_response
+        client.__aenter__.return_value = client
+        mock_client_cls.return_value = client
+
+        response = _get_test_client().post(
+            "/api/v1/chatgpt/parse-url", json={"url": "https://example.com/recipe"},
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            "success": True, "data": {"is_recipe": True, "title": "Mac & Cheese"},
+        }
+        assert client.post.call_args.args[0] == "https://api.openai.com/v1/chat/completions"
+
     @patch("app.routes.chatgpt.call_openai_chat")
     @patch("app.routes.chatgpt.fetch_and_extract")
     def test_parse_url_success(self, mock_fetch, mock_call):
@@ -394,7 +422,8 @@ class TestChatGPTParseUrl:
             json={"url": "https://example.com/recipe"},
         )
         assert response.status_code == 200
-        assert mock_call.call_args.kwargs["model"] == "gpt-4o-mini"
+        from app.services.recipe_service import DEFAULT_CHAT_MODEL
+        assert mock_call.call_args.kwargs["model"] == DEFAULT_CHAT_MODEL
 
     @patch("app.routes.chatgpt.fetch_and_extract")
     def test_fetch_failure_raises_http_exception(self, mock_fetch):

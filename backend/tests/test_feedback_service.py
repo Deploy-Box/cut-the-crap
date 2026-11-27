@@ -4,7 +4,7 @@ import time
 
 import httpx
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.services import feedback_service
 from app.services.feedback_service import (
@@ -105,6 +105,20 @@ class TestSendErrorEmail:
 
 
 class TestSendFeedbackEmail:
+    @pytest.mark.asyncio
+    @patch("app.services.token_service.get_bearer_token", new_callable=AsyncMock, return_value=None)
+    @patch("app.services.feedback_service.get_settings")
+    async def test_openai_key_is_never_used_for_email(self, mock_settings, _mock_token):
+        mock_settings.return_value = MagicMock(openai_api_key="sk-test", deploy_box_api_key="")
+        assert await feedback_service._get_email_headers() is None
+
+    @pytest.mark.asyncio
+    @patch("app.services.token_service.get_bearer_token", new_callable=AsyncMock, return_value=None)
+    @patch("app.services.feedback_service.get_settings")
+    async def test_separate_email_api_key(self, mock_settings, _mock_token):
+        mock_settings.return_value = MagicMock(openai_api_key="sk-test", deploy_box_api_key="email-key")
+        assert (await feedback_service._get_email_headers())["x-api-key"] == "email-key"
+
     @pytest.mark.asyncio
     async def test_sends_feedback(self):
         mock_post = AsyncMock(return_value={"success": True})

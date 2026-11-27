@@ -150,7 +150,7 @@ jobs:
             --value "$postgres_connection_string" \
             --output none
 
-          for secret in ctc-workos-api-key ctc-workos-client-id \
+          for secret in ctc-workos-api-key ctc-workos-client-id ctc-openai-api-key \
             ctc-deploy-box-client-id ctc-deploy-box-client-secret ctc-chatgpt-api-base; do
             value="$(read_secret "$secret")"
             if [[ -z "$value" ]]; then

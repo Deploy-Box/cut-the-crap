@@ -54,10 +54,10 @@ async def _get_email_headers() -> dict | None:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {bearer}",
         }
-    if settings.openai_api_key:
+    if settings.deploy_box_api_key:
         return {
             "Content-Type": "application/json",
-            "x-api-key": settings.openai_api_key,
+            "x-api-key": settings.deploy_box_api_key,
         }
     return None
 

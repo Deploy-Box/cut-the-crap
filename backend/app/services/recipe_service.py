@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import html
 import ipaddress
+import json
 import re
 from typing import Any, Optional
 from urllib.parse import urlparse
@@ -21,7 +22,7 @@ from app.utils.logger import logger
 
 REMOVED_TAGS = ["script", "style", "noscript", "svg", "iframe", "template"]
 STRUCTURAL_TAGS = ["header", "footer", "nav", "aside", "form"]
-DEFAULT_CHAT_MODEL = "gpt-4o-mini"
+DEFAULT_CHAT_MODEL = "gpt-6-luna"
 
 FETCH_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -195,64 +196,83 @@ async def call_openai_chat(
     temperature: float = 0.2,
     max_tokens: int = 2000,
 ) -> dict[str, Any]:
-    """Forward *text* to the ChatGPT Azure Function at
-    ``CHATGPT_API_BASE/api/v1/chatgpt`` and return its response.
+    """Call OpenAI directly and return the existing application response envelope.
 
     Returns ``{"success": True, "data": <parsed JSON>}`` on success, or
     ``{"success": False, "error": "..."}`` on failure.
     """
     settings = get_settings()
 
-    # Prefer OAuth2 client credentials; fall back to legacy API key
-    from app.services.token_service import get_bearer_token
-
-    bearer = await get_bearer_token()
-    if bearer:
-        headers: dict[str, str] = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {bearer}",
-        }
-    elif settings.openai_api_key:
-        headers = {
-            "Content-Type": "application/json",
-            "x-api-key": settings.openai_api_key,
-        }
-    else:
-        return {"success": False, "error": "Deploy Box API credentials are not configured on the server."}
-
-    url = f"{settings.chatgpt_api_base.rstrip('/')}/api/v1/chatgpt"
+    if not settings.openai_api_key:
+        logger.error("OPENAI_API_KEY is not configured")
+        return {"success": False, "error": "OpenAI API key is not configured on the server."}
 
     payload: dict[str, Any] = {
-        "text": text[:12_000],
-        "system_prompt": system_prompt,
         "model": model,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": text[:12_000]},
+        ],
+        "max_completion_tokens": max_tokens,
     }
+    if model == "gpt-6-luna":
+        payload["reasoning_effort"] = "none"
+        payload["temperature"] = temperature
+    elif not model.startswith(("gpt-5", "gpt-6")):
+        payload["temperature"] = temperature
     if response_format:
         payload["response_format"] = response_format
 
     try:
-        timeout_seconds = max(len(text) / 100, 10)  # ~100 tokens per second, minimum 10 seconds
-        async with httpx.AsyncClient(timeout=timeout_seconds, verify=not settings.is_dev) as client:
-            resp = await client.post(url, headers=headers, json=payload)
+        timeout_seconds = max(len(text[:12_000]) / 100, 30)
+        async with httpx.AsyncClient(timeout=timeout_seconds) as client:
+            resp = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {settings.openai_api_key}"},
+                json=payload,
+            )
     except httpx.TimeoutException:
-        logger.error("Azure Function timed out: %s", url)
+        logger.error("OpenAI API request timed out")
         return {"success": False, "error": "ChatGPT API timed out.", "status_code": 408}
     except httpx.RequestError as exc:
-        logger.error("Azure Function request error: %s", exc)
+        logger.error("OpenAI API request error: %s", exc)
         return {"success": False, "error": "Could not reach the ChatGPT API.", "status_code": 0}
 
     if resp.status_code != 200:
-        logger.error("Azure Function error %d: %s", resp.status_code, resp.text[:500])
+        logger.error("OpenAI API returned status %d", resp.status_code)
         return {
             "success": False,
             "error": f"ChatGPT API returned {resp.status_code}",
             "status_code": resp.status_code,
         }
 
-    logger.info("Azure Function response: %s", resp.text[:500])
-    return resp.json()
+    try:
+        choice = resp.json()["choices"][0]
+        message = choice["message"]
+        if message.get("refusal"):
+            logger.warning("OpenAI refused the request")
+            return {"success": False, "error": "ChatGPT declined the request.", "status_code": 422}
+        if choice.get("finish_reason") != "stop":
+            logger.warning("OpenAI response was incomplete: %s", choice.get("finish_reason"))
+            return {"success": False, "error": "ChatGPT returned an incomplete response.", "status_code": 502}
+        content = message["content"]
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("empty response content")
+        try:
+            data = json.loads(content)
+        except json.JSONDecodeError:
+            if response_format and response_format.get("type") in ("json_schema", "json_object"):
+                raise
+            data = content
+        if response_format:
+            response_type = response_format.get("type")
+            schema = response_format.get("json_schema", {}).get("schema", {})
+            if (response_type == "json_object" or schema.get("type") == "object") and not isinstance(data, dict):
+                raise ValueError("expected JSON object")
+        return {"success": True, "data": data}
+    except (ValueError, KeyError, IndexError, TypeError, AttributeError):
+        logger.warning("OpenAI returned an invalid response", exc_info=True)
+        return {"success": False, "error": "ChatGPT returned an invalid response.", "status_code": 502}
 
 
 # ── SSRF protection ──────────────────────────────────────────────────

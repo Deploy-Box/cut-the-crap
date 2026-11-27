@@ -176,11 +176,10 @@ class TestExtractVisibleText:
 # ═════════════════════════════════════════════════════════════════════
 
 
-@patch("app.services.token_service.get_bearer_token", new_callable=AsyncMock, return_value=None)
 class TestCallOpenaiChat:
     @pytest.mark.asyncio
     @patch("app.services.recipe_service.get_settings")
-    async def test_returns_error_when_api_key_missing(self, mock_get_settings, _mock_token):
+    async def test_returns_error_when_api_key_missing(self, mock_get_settings):
         mock_get_settings.return_value = MagicMock(openai_api_key="")
         result = await call_openai_chat(text="hello", system_prompt="you are helpful")
         assert result["success"] is False
@@ -189,15 +188,13 @@ class TestCallOpenaiChat:
     @pytest.mark.asyncio
     @patch("app.services.recipe_service.httpx.AsyncClient")
     @patch("app.services.recipe_service.get_settings")
-    async def test_successful_api_call(self, mock_get_settings, mock_client_cls, _mock_token):
-        mock_get_settings.return_value = MagicMock(
-            openai_api_key="sk-test",
-            chatgpt_api_base="https://api.test",
-        )
+    async def test_successful_api_call(self, mock_get_settings, mock_client_cls):
+        mock_get_settings.return_value = MagicMock(openai_api_key="sk-test")
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"success": True, "data": {"title": "Cake"}}
-        mock_response.text = '{"success": true}'
+        mock_response.json.return_value = {
+            "choices": [{"finish_reason": "stop", "message": {"content": '{"title":"Cake"}'}}]
+        }
 
         mock_client = AsyncMock()
         mock_client.post.return_value = mock_response
@@ -205,13 +202,32 @@ class TestCallOpenaiChat:
         mock_client.__aexit__ = AsyncMock(return_value=False)
         mock_client_cls.return_value = mock_client
 
-        result = await call_openai_chat(text="recipe text", system_prompt="extract")
-        assert result["success"] is True
+        response_format = {"type": "json_schema", "json_schema": {"name": "recipe"}}
+        result = await call_openai_chat(
+            text="recipe text", system_prompt="extract", model="gpt-6-luna",
+            response_format=response_format, temperature=0.3, max_tokens=1234,
+        )
+        assert result == {"success": True, "data": {"title": "Cake"}}
+        call = mock_client.post.call_args
+        assert call.args[0] == "https://api.openai.com/v1/chat/completions"
+        assert call.kwargs["headers"] == {"Authorization": "Bearer sk-test"}
+        assert call.kwargs["json"] == {
+            "model": "gpt-6-luna",
+            "messages": [
+                {"role": "system", "content": "extract"},
+                {"role": "user", "content": "recipe text"},
+            ],
+            "max_completion_tokens": 1234,
+            "reasoning_effort": "none",
+            "temperature": 0.3,
+            "response_format": response_format,
+        }
+        assert "verify" not in mock_client_cls.call_args.kwargs
 
     @pytest.mark.asyncio
     @patch("app.services.recipe_service.httpx.AsyncClient")
     @patch("app.services.recipe_service.get_settings")
-    async def test_timeout_returns_408(self, mock_get_settings, mock_client_cls, _mock_token):
+    async def test_timeout_returns_408(self, mock_get_settings, mock_client_cls):
         import httpx
 
         mock_get_settings.return_value = MagicMock(
@@ -231,7 +247,7 @@ class TestCallOpenaiChat:
     @pytest.mark.asyncio
     @patch("app.services.recipe_service.httpx.AsyncClient")
     @patch("app.services.recipe_service.get_settings")
-    async def test_request_error_returns_status_0(self, mock_get_settings, mock_client_cls, _mock_token):
+    async def test_request_error_returns_status_0(self, mock_get_settings, mock_client_cls):
         import httpx
 
         mock_get_settings.return_value = MagicMock(
@@ -251,7 +267,7 @@ class TestCallOpenaiChat:
     @pytest.mark.asyncio
     @patch("app.services.recipe_service.httpx.AsyncClient")
     @patch("app.services.recipe_service.get_settings")
-    async def test_non_200_returns_error_with_status(self, mock_get_settings, mock_client_cls, _mock_token):
+    async def test_non_200_returns_error_with_status(self, mock_get_settings, mock_client_cls):
         mock_get_settings.return_value = MagicMock(
             openai_api_key="sk-test",
             chatgpt_api_base="https://api.test",
@@ -273,14 +289,16 @@ class TestCallOpenaiChat:
     @pytest.mark.asyncio
     @patch("app.services.recipe_service.httpx.AsyncClient")
     @patch("app.services.recipe_service.get_settings")
-    async def test_text_truncated_to_12000(self, mock_get_settings, mock_client_cls, _mock_token):
+    async def test_text_truncated_to_12000(self, mock_get_settings, mock_client_cls):
         mock_get_settings.return_value = MagicMock(
             openai_api_key="sk-test",
             chatgpt_api_base="https://api.test",
         )
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"success": True}
+        mock_response.json.return_value = {
+            "choices": [{"finish_reason": "stop", "message": {"content": "{}"}}]
+        }
         mock_response.text = "{}"
 
         mock_client = AsyncMock()
@@ -294,7 +312,38 @@ class TestCallOpenaiChat:
 
         call_args = mock_client.post.call_args
         payload = call_args.kwargs.get("json") or call_args[1].get("json")
-        assert len(payload["text"]) == 12_000
+        assert len(payload["messages"][1]["content"]) == 12_000
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "body, expected_status",
+        [
+            ({"choices": [{"finish_reason": "stop", "message": {"refusal": "No"}}]}, 422),
+            ({"choices": [{"finish_reason": "length", "message": {"content": "{}"}}]}, 502),
+            ({"choices": [{"finish_reason": "stop", "message": {"content": "not json"}}]}, 502),
+            ({"choices": [{"finish_reason": "stop", "message": {"content": "[]"}}]}, 502),
+            ({"choices": []}, 502),
+        ],
+    )
+    @patch("app.services.recipe_service.httpx.AsyncClient")
+    @patch("app.services.recipe_service.get_settings")
+    async def test_invalid_or_refused_response(
+        self, mock_get_settings, mock_client_cls, body, expected_status,
+    ):
+        mock_get_settings.return_value = MagicMock(openai_api_key="sk-test")
+        mock_response = MagicMock(status_code=200)
+        mock_response.json.return_value = body
+        client = AsyncMock()
+        client.post.return_value = mock_response
+        client.__aenter__.return_value = client
+        mock_client_cls.return_value = client
+        result = await call_openai_chat(
+            text="x", system_prompt="y", response_format={
+                "type": "json_schema", "json_schema": {"schema": {"type": "object"}},
+            },
+        )
+        assert result["success"] is False
+        assert result["status_code"] == expected_status
 
 
 # ═════════════════════════════════════════════════════════════════════
